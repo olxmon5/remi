@@ -133,12 +133,16 @@
       display: flex;
       align-items: center;
       gap: 2px;
+      position: relative;
+      z-index: 2;
     }
 
     .card-center-suit {
       font-size: 26px;
       text-align: center;
       line-height: 1;
+      position: relative;
+      z-index: 2;
     }
 
     .card-bottom {
@@ -149,6 +153,208 @@
       display: flex;
       align-items: center;
       gap: 2px;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ==========================================================
+       ROYAL HONOR CARDS (A, J, Q, K) - LUXURY PLAYING CARD DESIGN
+       ========================================================== */
+    .playing-card.card-honor {
+      background: linear-gradient(165deg, #ffffff 0%, #fffdf8 45%, #fcf5e5 100%);
+      border: 1.5px solid #d4af37;
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.35), inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+    }
+
+    .playing-card.card-honor:hover {
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.45), 0 0 12px rgba(212, 175, 55, 0.4) !important;
+      border-color: #f59e0b;
+    }
+
+    /* Rank specific border nuances */
+    .playing-card.card-honor-a {
+      border-color: #eab308;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.35), 0 0 8px rgba(234, 179, 8, 0.25), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+    }
+    .playing-card.card-honor-k {
+      border-color: #f59e0b;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.35), 0 0 6px rgba(245, 158, 11, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+    }
+    .playing-card.card-honor-q {
+      border-color: #ec4899;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.35), 0 0 6px rgba(236, 72, 153, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+    }
+    .playing-card.card-honor-j {
+      border-color: #0284c7;
+      box-shadow: 0 5px 14px rgba(0, 0, 0, 0.35), 0 0 6px rgba(2, 132, 199, 0.2), inset 0 0 0 1px rgba(255, 255, 255, 0.8);
+    }
+
+    /* Inner Ornate Frame */
+    .card-inner-frame {
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(197, 160, 89, 0.45);
+      border-radius: 5px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .corner-flourish {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-color: rgba(180, 130, 40, 0.7);
+      border-style: solid;
+      pointer-events: none;
+    }
+    .corner-flourish.top-left {
+      top: 2px;
+      left: 2px;
+      border-width: 1px 0 0 1px;
+    }
+    .corner-flourish.top-right {
+      top: 2px;
+      right: 2px;
+      border-width: 1px 1px 0 0;
+    }
+    .corner-flourish.bottom-left {
+      bottom: 2px;
+      left: 2px;
+      border-width: 0 0 1px 1px;
+    }
+    .corner-flourish.bottom-right {
+      bottom: 2px;
+      right: 2px;
+      border-width: 0 1px 1px 0;
+    }
+
+    /* Typography for Rank in Honor Cards */
+    .card-honor .card-rank-text {
+      font-family: 'Cinzel', Georgia, serif;
+      font-weight: 800;
+      font-size: 14.5px;
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+
+    .honor-corner-pip {
+      font-size: 8.5px;
+      line-height: 1;
+      margin-left: 1px;
+      display: inline-block;
+    }
+    .suit-hearts .honor-corner-pip,
+    .suit-diamonds .honor-corner-pip {
+      color: #b91c1c;
+    }
+    .suit-spades .honor-corner-pip,
+    .suit-clubs .honor-corner-pip {
+      color: #0f172a;
+    }
+
+    /* Center Area in Honor Cards */
+    .honor-center-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 2;
+      height: 56px;
+      gap: 1px;
+      margin: auto 0;
+    }
+
+    /* Court Icon & SVG */
+    .honor-crown-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 15px;
+      line-height: 1;
+    }
+
+    .honor-court-svg {
+      width: 19px;
+      height: 13px;
+      display: block;
+    }
+    .honor-court-svg.svg-king {
+      color: #d97706;
+    }
+    .honor-court-svg.svg-queen {
+      color: #db2777;
+    }
+    .honor-court-svg.svg-jack {
+      color: #0284c7;
+    }
+
+    .honor-court-symbol {
+      font-size: 19px;
+      line-height: 1;
+      font-weight: 700;
+    }
+
+    /* Ace Center Styling */
+    .honor-center-a {
+      gap: 2px;
+    }
+
+    .honor-ace-halo {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(245, 158, 11, 0.16) 0%, rgba(245, 158, 11, 0.02) 70%, transparent 100%);
+      border: 1px dashed rgba(217, 119, 6, 0.45);
+      box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+    }
+
+    .honor-ace-symbol {
+      font-size: 25px;
+      line-height: 1;
+      font-weight: 800;
+      transform: scale(1.05);
+    }
+
+    /* Honor Ribbon / Badges */
+    .honor-ribbon {
+      font-family: 'Cinzel', serif;
+      font-size: 7px;
+      font-weight: 800;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      padding: 1px 5px;
+      border-radius: 3px;
+      line-height: 1.2;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .honor-ribbon-a {
+      color: #78350f;
+      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      border: 1px solid #d97706;
+    }
+
+    .honor-ribbon-k {
+      color: #7c2d12;
+      background: linear-gradient(135deg, #ffedd5, #fed7aa);
+      border: 1px solid #f97316;
+    }
+
+    .honor-ribbon-q {
+      color: #831843;
+      background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+      border: 1px solid #ec4899;
+    }
+
+    .honor-ribbon-j {
+      color: #0c4a6e;
+      background: linear-gradient(135deg, #e0f2fe, #bae6fd);
+      border: 1px solid #0284c7;
     }
 
     /* Center Table Elements */
@@ -836,11 +1042,18 @@
       border-radius: 7px;
       align-items: center;
       justify-content: center;
-      z-index: 5;
+      z-index: 10;
       box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
       border: 2px solid #ffffff;
       transition: opacity 0.2s ease, transform 0.2s ease;
       pointer-events: none;
+    }
+
+    /* Saat tidak di-hover, kartu honor di tangan tetap netral agar tidak bocor */
+    #humanHandCards:not(:hover) .playing-card.card-honor {
+      border: 1px solid #cbd5e1 !important;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+      background: #ffffff !important;
     }
 
     /* Tampilan kartu terbuka saat kursor di dalam #humanHandCards */

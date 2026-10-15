@@ -119,19 +119,98 @@
         const coverHtml = isCovered
           ? `<div class="card-back-cover"><div class="card-back-pattern"><i class="bi bi-eye-slash-fill text-warning"></i></div></div>`
           : '';
+
+        const rank = (card.rankCode || card.rankLabel || '').toString().toUpperCase();
+        const isHonor = ['A', 'J', 'Q', 'K'].includes(rank);
+        let honorClass = '';
+        let centerHtml = '';
+        let cornerPip = '';
+        let innerFrameHtml = '';
+
+        if (isHonor) {
+          honorClass = `card-honor card-honor-${rank.toLowerCase()}`;
+          innerFrameHtml = `
+            <div class="card-inner-frame">
+              <span class="corner-flourish top-left"></span>
+              <span class="corner-flourish top-right"></span>
+              <span class="corner-flourish bottom-left"></span>
+              <span class="corner-flourish bottom-right"></span>
+            </div>`;
+
+          if (rank === 'A') {
+            cornerPip = '<span class="honor-corner-pip">★</span>';
+            centerHtml = `
+              <div class="honor-center-content honor-center-a">
+                <div class="honor-ace-halo">
+                  <span class="honor-ace-symbol">${card.symbol}</span>
+                </div>
+                <div class="honor-ribbon honor-ribbon-a">ACE</div>
+              </div>`;
+          } else if (rank === 'K') {
+            cornerPip = '<span class="honor-corner-pip">♔</span>';
+            centerHtml = `
+              <div class="honor-center-content honor-center-k">
+                <div class="honor-crown-wrap">
+                  <svg class="honor-court-svg svg-king" viewBox="0 0 24 18" fill="currentColor">
+                    <path d="M2 15h20v2H2zM3 13l2.5-7.5L10 9.5 12 3l2 6.5 4.5-4L21 13H3z"/>
+                    <circle cx="5.5" cy="4.5" r="1.5"/>
+                    <circle cx="12" cy="2" r="1.5"/>
+                    <circle cx="18.5" cy="4.5" r="1.5"/>
+                  </svg>
+                </div>
+                <div class="honor-court-symbol">${card.symbol}</div>
+                <div class="honor-ribbon honor-ribbon-k">KING</div>
+              </div>`;
+          } else if (rank === 'Q') {
+            cornerPip = '<span class="honor-corner-pip">♕</span>';
+            centerHtml = `
+              <div class="honor-center-content honor-center-q">
+                <div class="honor-crown-wrap">
+                  <svg class="honor-court-svg svg-queen" viewBox="0 0 24 18" fill="currentColor">
+                    <path d="M3 14h18v1.5H3zM4 12.5c2-2 4-5.5 6-6.5l2-3.5 2 3.5c2 1 4 4.5 6 6.5H4z" opacity="0.9"/>
+                    <circle cx="12" cy="2.5" r="1.8"/>
+                    <circle cx="7" cy="6.5" r="1.3"/>
+                    <circle cx="17" cy="6.5" r="1.3"/>
+                    <path d="M8 12.5c1.5-2 2.5-3.5 4-3.5s2.5 1.5 4 3.5H8z"/>
+                  </svg>
+                </div>
+                <div class="honor-court-symbol">${card.symbol}</div>
+                <div class="honor-ribbon honor-ribbon-q">QUEEN</div>
+              </div>`;
+          } else if (rank === 'J') {
+            cornerPip = '<span class="honor-corner-pip">⚔</span>';
+            centerHtml = `
+              <div class="honor-center-content honor-center-j">
+                <div class="honor-crown-wrap">
+                  <svg class="honor-court-svg svg-jack" viewBox="0 0 24 18" fill="currentColor">
+                    <path d="M12 2C8.5 2 6 4.5 6 8v3c0 3 2.5 5.5 6 6.5 3.5-1 6-3.5 6-6.5V8c0-3.5-2.5-6-6-6zm0 2c2.5 0 4 1.8 4 4v1H8V8c0-2.2 1.5-4 4-4zm-4 7h8v1c0 2-1.8 3.8-4 4.5-2.2-.7-4-2.5-4-4.5v-1z"/>
+                    <path d="M9 10h6v1.2H9z"/>
+                  </svg>
+                </div>
+                <div class="honor-court-symbol">${card.symbol}</div>
+                <div class="honor-ribbon honor-ribbon-j">JACK</div>
+              </div>`;
+          }
+        } else {
+          centerHtml = `<div class="card-center-suit">${card.symbol}</div>`;
+        }
+
         return `
-      <div class="playing-card ${card.colorClass} ${isPlayable ? 'playable' : ''} ${customClass}" 
+      <div class="playing-card ${card.colorClass} ${honorClass} ${isPlayable ? 'playable' : ''} ${customClass}" 
            data-card-id="${card.id}" 
            title="${card.rankLabel} of ${card.suitName}">
         ${coverHtml}
+        ${innerFrameHtml}
         <div class="card-top">
-          <span>${card.rankLabel}</span>
-          <span>${card.symbol}</span>
+          <span class="card-rank-text">${card.rankLabel}</span>
+          <span class="card-suit-text">${card.symbol}</span>
+          ${cornerPip}
         </div>
-        <div class="card-center-suit">${card.symbol}</div>
+        ${centerHtml}
         <div class="card-bottom">
-          <span>${card.rankLabel}</span>
-          <span>${card.symbol}</span>
+          <span class="card-rank-text">${card.rankLabel}</span>
+          <span class="card-suit-text">${card.symbol}</span>
+          ${cornerPip}
         </div>
       </div>
     `;
