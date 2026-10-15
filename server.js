@@ -127,7 +127,11 @@ function sendSanitizedRoomState(roomId) {
       players: sanitizedPlayers,
       myHand: p.hand,
       myId: p.id,
-      isMyTurn: room.status === 'PLAYING' && room.players[room.turnIndex] && room.players[room.turnIndex].socketId === p.socketId,
+      isMyTurn: room.status === 'PLAYING' &&
+        (room.phase === 'PLAYING' || room.phase === 'CHOOSE_BASE') &&
+        room.players[room.turnIndex] &&
+        room.players[room.turnIndex].socketId === p.socketId &&
+        !(room.roundActedPlayers && room.roundActedPlayers.includes(p.id)),
       deckCount: room.deck.length,
       baseCard: room.baseCard,
       activeSuit: room.activeSuit,
@@ -192,6 +196,8 @@ function advanceToNextPlayer(room) {
   );
 
   if (roundFinished) {
+    room.turnIndex = -1;
+    room.phase = 'ROUND_SUMMARY';
     evaluateTrickWinner(room);
     return;
   }
@@ -201,6 +207,8 @@ function advanceToNextPlayer(room) {
 }
 
 function evaluateTrickWinner(room) {
+  room.turnIndex = -1;
+  room.phase = 'ROUND_SUMMARY';
   sendSanitizedRoomState(room.id);
   broadcastRoom(room.id, 'gameLog', {
     type: 'info',
@@ -304,20 +312,25 @@ function startNextRound(room) {
     room.autoNextRoundTimer = null;
   }
 
-  if (room.nextRoundState) {
-    if (room.nextRoundState.nextBaseLeader) {
-      room.roundLeader = room.nextRoundState.nextBaseLeader.id;
-      room.turnIndex = room.nextRoundState.nextBaseLeader.id;
-    }
-    room.baseCard = null;
-    room.activeSuit = null;
-    room.trickPlays = [];
-    room.roundPlays = [];
-    room.roundActedPlayers = [];
-    room.roundNumber++;
-    room.phase = 'CHOOSE_BASE';
-    room.roundWinnerInfo = null;
-    room.nextRoundState = null;
+  const active = getActivePlayers(room);
+  let nextLeader = room.nextRoundState ? room.nextRoundState.nextBaseLeader : null;
+  if (!nextLeader || (nextLeader && nextLeader.rank !== null)) {
+    nextLeader = active.length > 0 ? active[0] : null;
+  }
+
+  if (nextLeader) {
+    room.roundLeader = nextLeader.id;
+    room.turnIndex = nextLeader.id;
+  }
+  room.baseCard = null;
+  room.activeSuit = null;
+  room.trickPlays = [];
+  room.roundPlays = [];
+  room.roundActedPlayers = [];
+  room.roundNumber++;
+  room.phase = 'CHOOSE_BASE';
+  room.roundWinnerInfo = null;
+  room.nextRoundState = null;
 
     broadcastRoom(room.id, 'gameLog', {
       type: 'base',
@@ -326,7 +339,6 @@ function startNextRound(room) {
 
     sendSanitizedRoomState(room.id);
   }
-}
 
 function applyTrickCardsPenalty(room, player) {
   if (!room.roundActedPlayers) room.roundActedPlayers = [];
@@ -542,9 +554,11 @@ io.on('connection', (socket) => {
     const roomId = socket.roomId;
     const room = rooms[roomId];
     if (!room || room.status !== 'PLAYING' || room.gameOver) return;
+    if (room.phase !== 'PLAYING' && room.phase !== 'CHOOSE_BASE') return;
 
     const curPlayer = room.players[room.turnIndex];
     if (!curPlayer || curPlayer.socketId !== socket.id || curPlayer.rank !== null) return;
+    if (room.phase === 'PLAYING' && room.roundActedPlayers && room.roundActedPlayers.includes(curPlayer.id)) return;
 
     const cardIdx = curPlayer.hand.findIndex(c => c.id === cardId);
     if (cardIdx === -1) return;
@@ -602,9 +616,11 @@ io.on('connection', (socket) => {
     const roomId = socket.roomId;
     const room = rooms[roomId];
     if (!room || room.status !== 'PLAYING' || room.gameOver) return;
+    if (room.phase !== 'PLAYING') return;
 
     const curPlayer = room.players[room.turnIndex];
     if (!curPlayer || curPlayer.socketId !== socket.id || curPlayer.rank !== null) return;
+    if (room.roundActedPlayers && room.roundActedPlayers.includes(curPlayer.id)) return;
 
     if (hasMatchingSuit(curPlayer, room.activeSuit)) return;
 
@@ -641,9 +657,11 @@ io.on('connection', (socket) => {
     const roomId = socket.roomId;
     const room = rooms[roomId];
     if (!room || room.status !== 'PLAYING' || room.gameOver) return;
+    if (room.phase !== 'PLAYING') return;
 
     const curPlayer = room.players[room.turnIndex];
     if (!curPlayer || curPlayer.socketId !== socket.id || curPlayer.rank !== null) return;
+    if (room.roundActedPlayers && room.roundActedPlayers.includes(curPlayer.id)) return;
 
     if (!hasMatchingSuit(curPlayer, room.activeSuit) && room.deck.length === 0 && room.trickPlays.length > 0) {
       applyTrickCardsPenalty(room, curPlayer);
@@ -655,9 +673,11 @@ io.on('connection', (socket) => {
     const roomId = socket.roomId;
     const room = rooms[roomId];
     if (!room || room.status !== 'PLAYING' || room.gameOver) return;
+    if (room.phase !== 'PLAYING') return;
 
     const curPlayer = room.players[room.turnIndex];
     if (!curPlayer || curPlayer.socketId !== socket.id || curPlayer.rank !== null) return;
+    if (room.roundActedPlayers && room.roundActedPlayers.includes(curPlayer.id)) return;
 
     if (hasMatchingSuit(curPlayer, room.activeSuit)) return;
     if (room.deck.length > 0 || room.trickPlays.length > 0) return;

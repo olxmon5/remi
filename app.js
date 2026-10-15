@@ -170,7 +170,9 @@
         const myId = isMp ? gameState.myId : 0;
         const myPlayer = gameState.players.find(p => p.id === myId) || { name: 'Anda', hand: [], rank: null };
         const myHand = isMp ? (gameState.myHand || []) : (myPlayer.hand || []);
-        const isMyTurn = isMp ? gameState.isMyTurn : (gameState.turnIndex === 0 && myPlayer.rank === null && !gameState.gameOver);
+        const isMyTurn = isMp
+          ? (gameState.isMyTurn && gameState.phase !== 'ROUND_SUMMARY' && !gameState.gameOver)
+          : (gameState.turnIndex === 0 && myPlayer.rank === null && !gameState.gameOver && gameState.phase !== 'ROUND_SUMMARY' && !(gameState.roundActedPlayers && gameState.roundActedPlayers.includes(0)));
 
         const activePlayers = gameState.players.filter(p => p.rank === null);
         $('#activePlayersCountBadge').text(`Aktif: ${activePlayers.length}`);
@@ -286,7 +288,7 @@
         let oppHtml = '';
         const opponents = gameState.players.filter(p => p.id !== myId);
         opponents.forEach(opp => {
-          const isTurn = (gameState.turnIndex === opp.id) && !gameState.gameOver && (opp.rank === null);
+          const isTurn = (gameState.turnIndex === opp.id) && !gameState.gameOver && (opp.rank === null) && gameState.phase !== 'ROUND_SUMMARY';
           const isLeader = (gameState.roundLeader === opp.id) && (opp.rank === null);
           const isFinished = opp.rank !== null;
           const isLastLoser = opp.isLoser;
@@ -362,7 +364,7 @@
             if (isMyTurn) {
               if (gameState.phase === 'CHOOSE_BASE') {
                 canPlay = true;
-              } else {
+              } else if (gameState.phase === 'PLAYING') {
                 if (card.suit === gameState.activeSuit) {
                   canPlay = true;
                 }
@@ -733,6 +735,8 @@
 
       function runTurnCycleOffline() {
         if (gameState.gameOver || mode !== 'OFFLINE') return;
+        if (gameState.phase !== 'CHOOSE_BASE' && gameState.phase !== 'PLAYING') return;
+        if (gameState.turnIndex < 0 || gameState.turnIndex >= gameState.players.length) return;
 
         let loops = 0;
         while (gameState.players[gameState.turnIndex].rank !== null && loops < gameState.players.length) {
@@ -752,6 +756,8 @@
 
       function botTakeActionOffline(bot) {
         if (gameState.gameOver || bot.rank !== null || mode !== 'OFFLINE') return;
+        if (gameState.phase !== 'CHOOSE_BASE' && gameState.phase !== 'PLAYING') return;
+        if (gameState.roundActedPlayers && gameState.roundActedPlayers.includes(bot.id)) return;
 
         if (gameState.phase === 'CHOOSE_BASE') {
           let chosenCard = bot.hand[0];
@@ -787,6 +793,9 @@
       }
 
       function playCardOffline(player, card, isNewBase = false) {
+        if (gameState.phase !== 'CHOOSE_BASE' && gameState.phase !== 'PLAYING') return;
+        if (!isNewBase && gameState.roundActedPlayers && gameState.roundActedPlayers.includes(player.id)) return;
+
         const cardIdx = player.hand.findIndex(c => c.id === card.id);
         if (cardIdx !== -1) player.hand.splice(cardIdx, 1);
 
@@ -837,6 +846,8 @@
         );
 
         if (roundFinished) {
+          gameState.turnIndex = -1;
+          gameState.phase = 'ROUND_SUMMARY';
           evaluateTrickWinnerOffline();
           return;
         }
@@ -846,6 +857,8 @@
       }
 
       function evaluateTrickWinnerOffline() {
+        gameState.turnIndex = -1;
+        gameState.phase = 'ROUND_SUMMARY';
         updateUI();
         addLog(`Putaran kartu selesai. Menghitung kartu tertinggi...`, 'info');
 
@@ -941,6 +954,8 @@
 
       function handleDrinkOrPenaltyOffline(player) {
         if (gameState.gameOver || player.rank !== null) return;
+        if (gameState.phase !== 'PLAYING') return;
+        if (gameState.roundActedPlayers && gameState.roundActedPlayers.includes(player.id)) return;
 
         if (gameState.deck.length > 0) {
           const drawnCard = gameState.deck.pop();
@@ -964,13 +979,17 @@
             addLog(`<strong>${player.name}</strong> langsung mendapatkan kartu cocok: <strong>${drawnCard.displayName}</strong>!`, 'play');
             updateUI();
             setTimeout(() => {
-              playCardOffline(player, drawnCard);
+              if (gameState.phase === 'PLAYING') {
+                playCardOffline(player, drawnCard);
+              }
             }, gameState.botDelay);
           } else {
             updateUI();
             if (gameState.deck.length > 0) {
               setTimeout(() => {
-                handleDrinkOrPenaltyOffline(player);
+                if (gameState.phase === 'PLAYING') {
+                  handleDrinkOrPenaltyOffline(player);
+                }
               }, Math.max(300, gameState.botDelay / 2));
             } else {
               applyTrickCardsPenaltyOffline(player);
@@ -994,6 +1013,7 @@
       }
 
       function applyTrickCardsPenaltyOffline(player) {
+        if (gameState.phase !== 'PLAYING') return;
         if (!gameState.roundActedPlayers) gameState.roundActedPlayers = [];
         if (!gameState.roundActedPlayers.includes(player.id)) {
           gameState.roundActedPlayers.push(player.id);
@@ -1205,22 +1225,17 @@
 
         if (mode === 'MULTIPLAYER') {
           if (!gameState.isMyTurn) return;
+          if (gameState.phase !== 'PLAYING' && gameState.phase !== 'CHOOSE_BASE') return;
+          if (gameState.phase === 'PLAYING' && gameState.roundActedPlayers && gameState.roundActedPlayers.includes(gameState.myId)) return;
           socket.emit('playCard', { cardId });
         } else {
-          // Jika masih dalam ROUND_SUMMARY dan pemain adalah calon leader yang berhak menentukan Kartu baru,
-          // langsung mulai ronde baru dan gunakan kartu ini sebagai Base
-          if (gameState.phase === 'ROUND_SUMMARY') {
-            const nextLeaderId = gameState.offlineNextRoundLeader !== undefined ? gameState.offlineNextRoundLeader : 0;
-            if (nextLeaderId === 0) {
-              triggerNextRoundOffline();
-            } else {
-              return;
-            }
-          }
-
+          // Jangan izinkan memainkan kartu jika sedang fase evaluasi/ROUND_SUMMARY atau bukan giliran pemain 0
+          if (gameState.phase === 'ROUND_SUMMARY') return;
           if (gameState.turnIndex !== 0) return;
           const human = gameState.players[0];
           if (human.rank !== null) return;
+          if (gameState.roundActedPlayers && gameState.roundActedPlayers.includes(human.id)) return;
+
           const card = human.hand.find(c => c.id === cardId);
           if (!card) return;
 
@@ -1228,10 +1243,12 @@
             playCardOffline(human, card, true);
             return;
           }
-          if (card.suit === gameState.activeSuit) {
-            playCardOffline(human, card, false);
-          } else {
-            alert(`Anda wajib mengeluarkan kartu ${getSuitObj(gameState.activeSuit).name} (${getSuitObj(gameState.activeSuit).symbol})!`);
+          if (gameState.phase === 'PLAYING') {
+            if (card.suit === gameState.activeSuit) {
+              playCardOffline(human, card, false);
+            } else {
+              alert(`Anda wajib mengeluarkan kartu ${getSuitObj(gameState.activeSuit).name} (${getSuitObj(gameState.activeSuit).symbol})!`);
+            }
           }
         }
       });
@@ -1242,11 +1259,16 @@
 
         if (mode === 'MULTIPLAYER') {
           if (!gameState.isMyTurn) return;
+          if (gameState.phase !== 'PLAYING') return;
+          if (gameState.roundActedPlayers && gameState.roundActedPlayers.includes(gameState.myId)) return;
           socket.emit('drinkCard');
         } else {
+          // Hanya izinkan minum saat fase PLAYING, giliran pemain 0, dan belum bertindak di ronde ini
+          if (gameState.phase !== 'PLAYING') return;
           if (gameState.turnIndex !== 0) return;
           const human = gameState.players[0];
           if (human.rank !== null) return;
+          if (gameState.roundActedPlayers && gameState.roundActedPlayers.includes(human.id)) return;
 
           if (hasMatchingSuit(human.hand, gameState.activeSuit)) {
             // alert(`Anda masih memiliki kartu ${getSuitObj(gameState.activeSuit).name}! Dilarang minum jika masih punya.`);
@@ -1276,11 +1298,15 @@
 
         if (mode === 'MULTIPLAYER') {
           if (!gameState.isMyTurn) return;
+          if (gameState.phase !== 'PLAYING') return;
+          if (gameState.roundActedPlayers && gameState.roundActedPlayers.includes(gameState.myId)) return;
           socket.emit('takePenaltyCards');
         } else {
+          if (gameState.phase !== 'PLAYING') return;
           if (gameState.turnIndex !== 0) return;
           const human = gameState.players[0];
           if (human.rank !== null) return;
+          if (gameState.roundActedPlayers && gameState.roundActedPlayers.includes(human.id)) return;
 
           if (hasMatchingSuit(human.hand, gameState.activeSuit)) {
             alert(`Anda masih punya kartu yang cocok! Dilarang ambil penalti.`);
@@ -1295,15 +1321,23 @@
       // Klik kartu meja langsung untuk ambil penalti
       $(document).on('click', '#currentTrickContainer .playing-card', function () {
         if (gameState.gameOver) return;
+        if (gameState.phase !== 'PLAYING') return;
         const isMp = mode === 'MULTIPLAYER';
         const myHand = isMp ? gameState.myHand : gameState.players[0].hand;
         const deckCount = isMp ? gameState.deckCount : gameState.deck.length;
 
         if (!hasMatchingSuit(myHand, gameState.activeSuit) && deckCount === 0 && gameState.trickPlays.length > 0) {
           if (isMp) {
-            if (gameState.isMyTurn) socket.emit('takePenaltyCards');
+            if (gameState.isMyTurn && (!gameState.roundActedPlayers || !gameState.roundActedPlayers.includes(gameState.myId))) {
+              socket.emit('takePenaltyCards');
+            }
           } else {
-            if (gameState.turnIndex === 0) applyTrickCardsPenaltyOffline(gameState.players[0]);
+            if (gameState.turnIndex === 0) {
+              const human = gameState.players[0];
+              if (!gameState.roundActedPlayers || !gameState.roundActedPlayers.includes(human.id)) {
+                applyTrickCardsPenaltyOffline(human);
+              }
+            }
           }
         }
       });
@@ -1314,11 +1348,15 @@
 
         if (mode === 'MULTIPLAYER') {
           if (!gameState.isMyTurn) return;
+          if (gameState.phase !== 'PLAYING') return;
+          if (gameState.roundActedPlayers && gameState.roundActedPlayers.includes(gameState.myId)) return;
           socket.emit('skipTurn');
         } else {
+          if (gameState.phase !== 'PLAYING') return;
           if (gameState.turnIndex !== 0) return;
           const human = gameState.players[0];
           if (human.rank !== null) return;
+          if (gameState.roundActedPlayers && gameState.roundActedPlayers.includes(human.id)) return;
 
           if (hasMatchingSuit(human.hand, gameState.activeSuit)) {
             alert(`Anda masih punya kartu yang cocok! Tidak boleh skip.`);
@@ -1367,7 +1405,12 @@
         if (window._offlineCountdownInterval) clearInterval(window._offlineCountdownInterval);
 
         if (gameState.phase === 'ROUND_SUMMARY') {
-          const nextLeaderId = gameState.offlineNextRoundLeader !== undefined ? gameState.offlineNextRoundLeader : 0;
+          let nextLeaderId = gameState.offlineNextRoundLeader !== undefined ? gameState.offlineNextRoundLeader : 0;
+          if (gameState.players[nextLeaderId] && gameState.players[nextLeaderId].rank !== null) {
+            const active = gameState.players.filter(p => p.rank === null);
+            if (active.length > 0) nextLeaderId = active[0].id;
+          }
+
           gameState.roundLeader = nextLeaderId;
           gameState.turnIndex = nextLeaderId;
           gameState.baseCard = null;
