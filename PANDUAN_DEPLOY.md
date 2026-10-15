@@ -4,7 +4,7 @@ Game ini dirancang dengan arsitektur modern:
 - **Frontend**: [index.html](file:///c:/xampp/htdocs/remi/index.html) (HTML, Bootstrap 5, jQuery, Socket.IO Client) dipasang di **Vercel** (Gratis).
 - **Backend Multiplayer**: [server.js](file:///c:/xampp/htdocs/remi/server.js) (Node.js + Express + Socket.IO) dipasang di **Railway** (Mendukung WebSocket).
 
----
+--- 
 
 ## BAGIAN 1: Deploy Backend ke Railway (Socket.IO)
 
