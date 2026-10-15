@@ -113,6 +113,7 @@ function sendSanitizedRoomState(roomId) {
       id: other.id,
       socketId: other.socketId,
       name: other.name,
+      avatar: other.avatar || '🦊',
       cardCount: other.hand.length,
       rank: other.rank,
       isLoser: other.isLoser || false,
@@ -137,7 +138,8 @@ function sendSanitizedRoomState(roomId) {
       phase: room.phase,
       rankings: room.rankings,
       gameOver: room.gameOver,
-      activeCount: activePlayers.length
+      activeCount: activePlayers.length,
+      roundWinnerInfo: room.roundWinnerInfo || null
     });
   });
 }
@@ -250,15 +252,16 @@ function evaluateTrickWinner(room) {
 
     if (checkGameOver(room)) return;
 
-    if (nextBaseLeader) {
-      room.roundLeader = nextBaseLeader.id;
-      room.turnIndex = nextBaseLeader.id;
-    }
-    room.baseCard = null;
-    room.activeSuit = null;
-    room.trickPlays = [];
-    room.roundNumber++;
-    room.phase = 'CHOOSE_BASE';
+    // Masuk ke fase ROUND_SUMMARY dengan jeda agar pemain bisa melihat kartu tertinggi
+    room.phase = 'ROUND_SUMMARY';
+    room.roundWinnerInfo = {
+      winnerName: roundWinner.name,
+      cardDisplayName: winningPlay.card.displayName,
+      nextLeaderName: nextBaseLeader ? nextBaseLeader.name : roundWinner.name
+    };
+    room.nextRoundState = {
+      nextBaseLeader: nextBaseLeader
+    };
 
     sendSanitizedRoomState(room.id);
   }, 1000);
@@ -285,7 +288,7 @@ io.on('connection', (socket) => {
   console.log('Client connected:', socket.id);
 
   // Buat Room
-  socket.on('createRoom', ({ playerName, dealOption }, callback) => {
+  socket.on('createRoom', ({ playerName, playerAvatar, dealOption }, callback) => {
     const roomId = Math.random().toString(36).substring(2, 7).toUpperCase();
     rooms[roomId] = {
       id: roomId,
@@ -297,6 +300,7 @@ io.on('connection', (socket) => {
           id: 0,
           socketId: socket.id,
           name: playerName || 'Player 1',
+          avatar: playerAvatar || '🦊',
           hand: [],
           rank: null,
           isLoser: false
@@ -321,7 +325,7 @@ io.on('connection', (socket) => {
   });
 
   // Gabung Room
-  socket.on('joinRoom', ({ roomId, playerName }, callback) => {
+  socket.on('joinRoom', ({ roomId, playerName, playerAvatar }, callback) => {
     const upperRoomId = (roomId || '').trim().toUpperCase();
     const room = rooms[upperRoomId];
 
@@ -341,6 +345,7 @@ io.on('connection', (socket) => {
       id: room.players.length,
       socketId: socket.id,
       name: playerName || `Player ${room.players.length + 1}`,
+      avatar: playerAvatar || '🐱',
       hand: [],
       rank: null,
       isLoser: false
@@ -354,7 +359,7 @@ io.on('connection', (socket) => {
 
     broadcastRoom(upperRoomId, 'gameLog', {
       type: 'info',
-      msg: `👋 <strong>${newPlayer.name}</strong> bergabung ke ruangan!`
+      msg: `👋 ${newPlayer.avatar || '👤'} <strong>${newPlayer.name}</strong> bergabung ke ruangan!`
     });
 
     sendSanitizedRoomState(upperRoomId);
@@ -408,6 +413,69 @@ io.on('connection', (socket) => {
 
     sendSanitizedRoomState(roomId);
     if (callback) callback({ success: true });
+  });
+
+  // Ulangi / Retry Permainan dalam Room yang Sama (Reset room state)
+  socket.on('restartGame', (callback) => {
+    const roomId = socket.roomId;
+    const room = rooms[roomId];
+    if (!room) return;
+
+    // Reset status room kembali ke LOBBY
+    room.status = 'LOBBY';
+    room.phase = 'PLAYING';
+    room.gameOver = false;
+    room.deck = [];
+    room.rankings = [];
+    room.trickPlays = [];
+    room.baseCard = null;
+    room.activeSuit = null;
+    room.roundLeader = 0;
+    room.turnIndex = 0;
+    room.roundNumber = 1;
+
+    room.players.forEach(p => {
+      p.hand = [];
+      p.rank = null;
+      p.isLoser = false;
+    });
+
+    broadcastRoom(roomId, 'gameLog', {
+      type: 'info',
+      msg: `🔄 Permainan telah direset ke Lobby! Host dapat menekan <strong>Mulai Game Sekarang</strong> untuk ronde baru.`
+    });
+
+    sendSanitizedRoomState(roomId);
+    if (callback) callback({ success: true });
+  });
+
+  // Pemain / Host Klik Lanjut Ronde Baru (ROUND_SUMMARY -> Next Round)
+  socket.on('nextRound', () => {
+    const roomId = socket.roomId;
+    const room = rooms[roomId];
+    if (!room || room.status !== 'PLAYING' || room.gameOver) return;
+    if (room.phase !== 'ROUND_SUMMARY') return;
+
+    if (room.nextRoundState) {
+      if (room.nextRoundState.nextBaseLeader) {
+        room.roundLeader = room.nextRoundState.nextBaseLeader.id;
+        room.turnIndex = room.nextRoundState.nextBaseLeader.id;
+      }
+      room.baseCard = null;
+      room.activeSuit = null;
+      room.trickPlays = [];
+      room.roundNumber++;
+      room.phase = 'CHOOSE_BASE';
+      room.roundWinnerInfo = null;
+      room.nextRoundState = null;
+
+      broadcastRoom(roomId, 'gameLog', {
+        type: 'base',
+        msg: `▶️ Ronde #${room.roundNumber} dimulai! Giliran <strong>${room.players[room.roundLeader].name}</strong> menentukan Base baru.`
+      });
+
+      sendSanitizedRoomState(roomId);
+    }
   });
 
   // Pemain Mengeluarkan Kartu

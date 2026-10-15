@@ -214,6 +214,61 @@
       position: relative;
     }
 
+    .player-avatar-circle {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1.5px solid rgba(255, 255, 255, 0.2);
+      flex-shrink: 0;
+      user-select: none;
+      line-height: 1;
+    }
+
+    /* Avatar Picker Selector */
+    .avatar-picker-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+    }
+
+    @media (max-width: 576px) {
+      .avatar-picker-grid {
+        grid-template-columns: repeat(6, 1fr);
+      }
+    }
+
+    .avatar-option-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      padding: 6px 4px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .avatar-option-btn:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: scale(1.1);
+    }
+
+    .avatar-option-btn.selected {
+      border-color: #f59e0b;
+      background: rgba(245, 158, 11, 0.25);
+      box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
+      transform: scale(1.12);
+    }
+
     .player-pod.active-turn {
       border-color: #f59e0b;
       box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
@@ -272,17 +327,30 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: 0 8px;
+      margin: 0 6px;
+      position: relative;
+    }
+
+    .played-slot.is-base-slot .playing-card {
+      border: 2px solid #f59e0b;
+      box-shadow: 0 0 16px rgba(245, 158, 11, 0.7);
+    }
+
+    .played-slot.is-winner-slot .playing-card {
+      border: 3px solid #22c55e;
+      box-shadow: 0 0 20px rgba(34, 197, 94, 0.9);
+      animation: pulsePlayable 1.2s infinite alternate;
     }
 
     .played-slot .slot-name {
-      font-size: 11px;
-      margin-top: 4px;
-      color: #94a3b8;
-      max-width: 80px;
+      font-size: 11.5px;
+      margin-top: 5px;
+      color: #cbd5e1;
+      max-width: 90px;
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
+      font-weight: 600;
     }
 
     /* Rank badges */
@@ -341,29 +409,36 @@
       <div>
         <h2 class="h3 fw-bold mb-0 text-warning d-flex align-items-center gap-2">
           <i class="bi bi-suit-spade-fill"></i> Remi Minuman
-          <span class="badge bg-danger fs-6" id="badgeGameMode">Offline (Bot)</span>
+          <span class="badge bg-danger fs-6 d-none" id="badgeGameMode">Offline (Bot)</span>
         </h2>
-        <small class="text-white-50">Sistem Peringkat Juara 1 s/d Kalah Terakhir (Khas Solo Raya / Jateng)</small>
+        <small class="text-white-50 d-none">Sistem Peringkat Juara 1 s/d Kalah Terakhir (Khas Solo Raya /
+          Jateng)</small>
       </div>
       <div class="d-flex flex-wrap gap-2 mt-2 mt-sm-0 align-items-center">
-        <div id="roomInfoBar" class="d-none badge bg-dark border border-warning px-3 py-2 text-warning fs-6">
-          Room: <strong id="currentRoomCodeDisplay">-----</strong>
+        <div id="roomInfoBar"
+          class="d-none badge bg-dark border border-warning px-3 py-2 text-warning fs-6 d-flex align-items-center gap-2">
+          <span>Room: <strong id="currentRoomCodeDisplay">-----</strong></span>
+          <button class="btn btn-outline-warning btn-sm py-0 px-2 fw-bold" id="btnCopyRoomCode"
+            title="Salin Link Room untuk Teman">
+            <i class="bi bi-link-45deg me-1"></i>Salin Link
+          </button>
         </div>
-        <button class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#multiplayerModal">
-          <i class="bi bi-globe me-1"></i> Mode Online Multiplayer
+        <button class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#multiplayerModal"
+          id="btnOpenMpModal">
+          <i class="bi bi-door-open me-1"></i> Buat / Gabung Room
         </button>
-        <button class="btn btn-outline-light btn-sm" data-bs-toggle="modal" data-bs-target="#rulesModal">
+        <button class="btn btn-outline-light btn-sm d-none" data-bs-toggle="modal" data-bs-target="#rulesModal">
           <i class="bi bi-book me-1"></i> Aturan
         </button>
-        <button class="btn btn-warning btn-sm fw-bold" id="btnOpenSetupModal">
-          <i class="bi bi-arrow-repeat me-1"></i> Game Baru
+        <button class="btn btn-warning btn-sm fw-bold d-none" id="btnOpenSetupModal">
+          <i class="bi bi-robot me-1"></i> Mode Offline (Bot)
         </button>
       </div>
     </div>
 
     <div class="row g-3">
       <!-- Main Playing Table (Left / Center) -->
-      <div class="col-lg-9">
+      <div class="col-lg-12">
         <div class="poker-table d-flex flex-column justify-content-between">
 
           <!-- Top Opponents Area (Player 2, Player 3, Player 4, etc.) -->
@@ -371,32 +446,35 @@
             <!-- Opponents dynamically injected here -->
           </div>
 
-          <!-- Center Felt Arena (Base Card, Current Round Plays, and Minuman Deck) -->
+          <!-- Center Felt Arena (Cards Played in This Round & Minuman Deck) -->
           <div class="center-arena my-auto">
             <div class="row align-items-center">
 
-              <!-- Left: Base Card & Current Target Suit -->
-              <div class="col-md-3 text-center mb-3 mb-md-0 border-end border-secondary border-opacity-25">
-                <div class="small text-white-50 text-uppercase fw-bold mb-2">Base / Kartu Acuan</div>
-                <div id="baseCardContainer" class="d-flex justify-content-center">
-                  <!-- Base card rendered here -->
+              <!-- Center: Cards Played in This Round (Termasuk Base Card) -->
+              <div class="col-md-9 text-center mb-3 mb-md-0">
+                <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-2">
+                  <div class="small text-white-50 text-uppercase fw-bold">
+                    Kartu di Meja (<span id="roundProgress">0/0</span>)
+                  </div>
+                  <div id="currentSuitBadgeContainer d-none">
+                    <!-- Current target suit badge -->
+                  </div>
                 </div>
-                <div class="mt-2" id="currentSuitBadgeContainer">
-                  <!-- Suit badge -->
-                </div>
-              </div>
 
-              <!-- Center: Cards Played in This Round -->
-              <div class="col-md-6 text-center mb-3 mb-md-0">
-                <div class="small text-white-50 text-uppercase fw-bold mb-2">
-                  Putaran Berjalan (<span id="roundProgress">0/0</span>)
-                </div>
-                <div id="currentTrickContainer" class="d-flex flex-wrap justify-content-center align-items-center"
-                  style="min-height: 120px;">
-                  <!-- Cards played this trick -->
+                <div id="currentTrickContainer" class="d-flex flex-wrap justify-content-center align-items-center gap-2"
+                  style="min-height: 125px;">
+                  <!-- Cards played this trick (Base + player cards) -->
                   <span class="text-white-50 fst-italic">Menunggu pemain mengeluarkan kartu...</span>
                 </div>
+
                 <div id="trickStatusMsg" class="small text-info mt-2 fw-semibold"></div>
+
+                <!-- Tombol Lanjut Ronde Baru Saat Evaluasi Selesai (Jeda Melihat Kartu Tertinggi) -->
+                <div id="roundSummaryControl" class="mt-2 d-none">
+                  <button id="btnNextRound" class="btn btn-warning fw-bold px-4 py-2 shadow pulse-glow">
+                    <i class="bi bi-arrow-right-circle-fill me-1"></i> Next Round
+                  </button>
+                </div>
               </div>
 
               <!-- Right: Tumpukan "Minuman" (Deck Pile) -->
@@ -433,7 +511,7 @@
               <div class="d-flex align-items-center gap-3">
                 <div class="player-pod active-turn" id="playerPod-0">
                   <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-primary rounded-circle p-2"><i class="bi bi-person-fill"></i></span>
+                    <span class="player-avatar-circle" id="humanAvatarDisplay">🦊</span>
                     <div>
                       <h6 class="mb-0 fw-bold d-flex align-items-center gap-2" id="playerNameDisplay">
                         Anda (Player 1)
@@ -475,7 +553,7 @@
       </div>
 
       <!-- Right Sidebar: Leaderboard Rankings, Activity Logs & Game Info -->
-      <div class="col-lg-3">
+      <div class="col-lg-3 d-none">
 
         <!-- Peringkat Pemain / Leaderboard Realtime -->
         <div class="card bg-dark bg-opacity-75 border-secondary mb-3 text-light">
@@ -550,29 +628,48 @@
       <div class="modal-content bg-dark text-light border-primary">
         <div class="modal-header border-secondary">
           <h5 class="modal-title text-primary fw-bold" id="multiplayerModalLabel">
-            <i class="bi bi-globe me-2"></i> Online Multiplayer (Railway / Localhost)
+            <i class="bi bi-globe me-2"></i> Remi Minuman
           </h5>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label fw-semibold">URL Server Backend (Railway):</label>
-            <div class="input-group">
-              <span class="input-group-text bg-secondary border-secondary text-light"><i
-                  class="bi bi-hdd-network"></i></span>
-              <input type="text" class="form-control bg-dark text-light border-secondary" id="inputServerUrl"
-                value="remi-production-1110.up.railway.app" placeholder="https://remi-server-production.up.railway.app">
-            </div>
-            <small class="text-white-50">
-              Gunakan URL Railway Anda saat sudah deploy (contoh: <code>https://xxx.up.railway.app</code>) atau
-              <code>http://localhost:3000</code> untuk tes lokal.
-            </small>
+          <!-- URL Server Backend (Disembunyikan / Hidden default) -->
+          <div class="mb-3 d-none">
+            <label class="form-label fw-semibold">URL Server Backend:</label>
+            <input type="text" class="form-control bg-dark text-light border-secondary" id="inputServerUrl"
+              value="https://remi-production-1110.up.railway.app">
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Nama Anda:</label>
-            <input type="text" class="form-control bg-dark text-light border-secondary" id="inputMpPlayerName"
-              value="Pemain 1" maxlength="15">
+            <label class="form-label fw-semibold">Pilih Avatar:</label>
+            <div class="avatar-picker-grid" id="mpAvatarPicker">
+              <div class="avatar-option-btn selected" data-avatar="🦊">🦊</div>
+              <div class="avatar-option-btn" data-avatar="🐱">🐱</div>
+              <div class="avatar-option-btn" data-avatar="🐶">🐶</div>
+              <div class="avatar-option-btn" data-avatar="🦁">🦁</div>
+              <div class="avatar-option-btn" data-avatar="🐼">🐼</div>
+              <div class="avatar-option-btn" data-avatar="🐯">🐯</div>
+              <div class="avatar-option-btn" data-avatar="🐸">🐸</div>
+              <div class="avatar-option-btn" data-avatar="🐵">🐵</div>
+              <div class="avatar-option-btn" data-avatar="🐰">🐰</div>
+              <div class="avatar-option-btn" data-avatar="🐨">🐨</div>
+              <div class="avatar-option-btn" data-avatar="🐧">🐧</div>
+              <div class="avatar-option-btn" data-avatar="🦉">🦉</div>
+              <div class="avatar-option-btn" data-avatar="🦄">🦄</div>
+              <div class="avatar-option-btn" data-avatar="🐲">🐲</div>
+              <div class="avatar-option-btn" data-avatar="🐺">🐺</div>
+              <div class="avatar-option-btn" data-avatar="🤖">🤖</div>
+            </div>
+            <input type="hidden" id="inputMpPlayerAvatar" value="🦊">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Nama Pemain:</label>
+            <div class="input-group">
+              <span class="input-group-text bg-secondary border-secondary text-light fs-5 py-1 px-2" id="mpAvatarPreview">🦊</span>
+              <input type="text" class="form-control border-secondary fw-semibold" id="inputMpPlayerName" maxlength="15"
+                placeholder="Contoh : Yuuta">
+            </div>
           </div>
 
           <hr class="border-secondary">
@@ -581,11 +678,11 @@
           <ul class="nav nav-pills nav-fill mb-3" id="pills-tab" role="tablist">
             <li class="nav-item">
               <button class="nav-link active fw-bold" id="pills-create-tab" data-bs-toggle="pill"
-                data-bs-target="#pills-create" type="button">Buat Room Baru</button>
+                data-bs-target="#pills-create" type="button">Create Room</button>
             </li>
             <li class="nav-item">
               <button class="nav-link fw-bold" id="pills-join-tab" data-bs-toggle="pill" data-bs-target="#pills-join"
-                type="button">Gabung Room (Kode)</button>
+                type="button">Join Room</button>
             </li>
           </ul>
 
@@ -598,14 +695,14 @@
                   <option value="1">1 Kartu saja</option>
                   <option value="2">2 Kartu</option>
                   <option value="3">3 Kartu</option>
-                  <option value="4" selected>4 Kartu (Populer di Solo)</option>
+                  <option value="4" selected>4 Kartu</option>
                   <option value="5">5 Kartu</option>
                   <option value="7">7 Kartu</option>
                   <option value="all">Bagi Rata (Sisa 1 untuk Base)</option>
                 </select>
               </div>
               <button type="button" class="btn btn-primary w-100 fw-bold py-2" id="btnMpCreateRoom">
-                <i class="bi bi-plus-circle me-1"></i> Buat Room & Jadi Host
+                <i class="bi bi-plus-circle me-1"></i> Create Private Room
               </button>
             </div>
 
@@ -618,14 +715,14 @@
                   id="inputMpRoomCode" placeholder="ABCDE" maxlength="5">
               </div>
               <button type="button" class="btn btn-success w-100 fw-bold py-2" id="btnMpJoinRoom">
-                <i class="bi bi-door-open me-1"></i> Gabung ke Ruangan
+                <i class="bi bi-door-open me-1"></i> Join Game Room
               </button>
             </div>
           </div>
 
           <div id="mpConnectionStatus" class="mt-3 text-center small"></div>
         </div>
-        <div class="modal-footer border-secondary justify-content-between">
+        <div class="modal-footer border-secondary justify-content-between d-none">
           <button type="button" class="btn btn-outline-warning btn-sm" id="btnSwitchOffline">
             <i class="bi bi-robot me-1"></i> Beralih ke Mode Offline (Bot)
           </button>
@@ -709,9 +806,35 @@
           </div>
 
           <div class="mb-3">
+            <label class="form-label fw-semibold">Pilih Avatar:</label>
+            <div class="avatar-picker-grid" id="offlineAvatarPicker">
+              <div class="avatar-option-btn selected" data-avatar="🦊">🦊</div>
+              <div class="avatar-option-btn" data-avatar="🐱">🐱</div>
+              <div class="avatar-option-btn" data-avatar="🐶">🐶</div>
+              <div class="avatar-option-btn" data-avatar="🦁">🦁</div>
+              <div class="avatar-option-btn" data-avatar="🐼">🐼</div>
+              <div class="avatar-option-btn" data-avatar="🐯">🐯</div>
+              <div class="avatar-option-btn" data-avatar="🐸">🐸</div>
+              <div class="avatar-option-btn" data-avatar="🐵">🐵</div>
+              <div class="avatar-option-btn" data-avatar="🐰">🐰</div>
+              <div class="avatar-option-btn" data-avatar="🐨">🐨</div>
+              <div class="avatar-option-btn" data-avatar="🐧">🐧</div>
+              <div class="avatar-option-btn" data-avatar="🦉">🦉</div>
+              <div class="avatar-option-btn" data-avatar="🦄">🦄</div>
+              <div class="avatar-option-btn" data-avatar="🐲">🐲</div>
+              <div class="avatar-option-btn" data-avatar="🐺">🐺</div>
+              <div class="avatar-option-btn" data-avatar="🤖">🤖</div>
+            </div>
+            <input type="hidden" id="setupPlayerAvatar" value="🦊">
+          </div>
+
+          <div class="mb-3">
             <label class="form-label fw-semibold">Nama Anda:</label>
-            <input type="text" class="form-control bg-dark text-light border-secondary" id="setupPlayerName"
-              value="Pemain 1" maxlength="15">
+            <div class="input-group">
+              <span class="input-group-text bg-secondary border-secondary text-light fs-5 py-1 px-2" id="offlineAvatarPreview">🦊</span>
+              <input type="text" class="form-control bg-dark text-light border-secondary" id="setupPlayerName"
+                value="Pemain 1" maxlength="15">
+            </div>
           </div>
         </div>
         <div class="modal-footer border-secondary">
@@ -764,7 +887,8 @@
                   (ambil kartu tertutup dari tumpukan minuman) satu demi satu sampai mendapatkan bentuk yang cocok.</li>
                 <li>Jika tumpukan minuman <strong>habis</strong> dan pemain tersebut tetap tidak dapat kartu cocok, maka
                   <strong>semua kartu yang sudah dikeluarkan pemain lain di ronde tersebut harus diambil semua oleh
-                    pemain itu ke tangannya</strong>!</li>
+                    pemain itu ke tangannya</strong>!
+                </li>
                 <li>Jika tumpukan minuman sudah habis sejak awal, meja kosong, dan dia tidak punya bentuk itu, barulah
                   pemain itu <strong>di-skip / lewat</strong>.</li>
               </ul>
@@ -997,32 +1121,48 @@
       `).css('background', '');
         }
 
-        // Current Trick plays
-        if (gameState.trickPlays.length === 0) {
-          if (gameState.phase === 'CHOOSE_BASE') {
-            const leader = gameState.players.find(p => p.id === gameState.roundLeader);
-            $('#currentTrickContainer').html(`
-          <div class="text-warning fst-italic">
-            <i class="bi bi-star-fill me-1"></i> Menunggu ${leader ? leader.name : ''} menentukan Base baru...
-          </div>
-        `);
-          } else {
-            $('#currentTrickContainer').html('<span class="text-white-50 fst-italic">Belum ada kartu di ronde ini</span>');
-          }
-        } else {
-          let trickHtml = '';
-          for (let play of gameState.trickPlays) {
-            const p = gameState.players.find(x => x.id === play.playerId);
-            trickHtml += `
-          <div class="played-slot">
-            ${renderCardHtml(play.card)}
-            <div class="slot-name" title="${p ? p.name : ''}">${p ? p.name : ''}</div>
-          </div>
-        `;
-          }
-          $('#currentTrickContainer').html(trickHtml);
+        // Current Trick plays + Base Card (Digabung di satu meja)
+        let trickHtml = '';
+        if (gameState.baseCard) {
+          const leader = gameState.players.find(p => p.id === gameState.roundLeader);
+          trickHtml += `
+            <div class="played-slot is-base-slot">
+              ${renderCardHtml(gameState.baseCard)}
+              <div class="slot-name text-warning" title="Base: ${leader ? leader.name : 'Awal'}">
+                <i class="bi bi-flag-fill me-1"></i>Base (${leader ? leader.name : 'Awal'})
+              </div>
+            </div>
+          `;
         }
 
+        if (gameState.trickPlays.length === 0 && !gameState.baseCard) {
+          if (gameState.phase === 'CHOOSE_BASE') {
+            const leader = gameState.players.find(p => p.id === gameState.roundLeader);
+            trickHtml = `
+              <div class="text-warning fst-italic">
+                <i class="bi bi-star-fill me-1"></i> Menunggu ${leader ? leader.name : ''} menentukan Base baru...
+              </div>
+            `;
+          } else {
+            trickHtml = '<span class="text-white-50 fst-italic">Belum ada kartu di meja</span>';
+          }
+        } else {
+          for (let play of gameState.trickPlays) {
+            const p = gameState.players.find(x => x.id === play.playerId);
+            const isWinnerCard = gameState.phase === 'ROUND_SUMMARY' && gameState.roundWinnerInfo && gameState.roundWinnerInfo.winnerName === (p ? p.name : '');
+            trickHtml += `
+              <div class="played-slot ${isWinnerCard ? 'is-winner-slot' : ''}">
+                ${renderCardHtml(play.card)}
+                <div class="slot-name ${isWinnerCard ? 'text-success fw-bold' : ''}" title="${p ? p.name : ''}">
+                  ${isWinnerCard ? '<i class="bi bi-trophy-fill me-1"></i>' : ''}${p ? p.name : ''}
+                </div>
+              </div>
+            `;
+          }
+        }
+        $('#currentTrickContainer').html(trickHtml);
+
+        const totalCardsOnTable = gameState.trickPlays.length + (gameState.baseCard ? 1 : 0);
         $('#roundProgress').text(`${gameState.trickPlays.length}/${activePlayers.length}`);
 
         // Highest card
@@ -1063,13 +1203,14 @@
           oppHtml += `
         <div class="player-pod ${isTurn ? 'active-turn' : ''} ${isFinished ? (isLastLoser ? 'loser-pod' : 'finished-pod') : ''}" id="playerPod-${opp.id}">
           <div class="d-flex align-items-center gap-2">
-            <span class="badge ${isTurn ? 'bg-warning text-dark' : 'bg-secondary'} rounded-circle p-2">
-              <i class="bi ${isMp ? (opp.isHost ? 'bi-star-fill text-warning' : 'bi-person-fill') : 'bi-robot'}"></i>
+            <span class="player-avatar-circle" title="${opp.name}">
+              ${opp.avatar || (isMp ? '👤' : '🤖')}
             </span>
             <div>
               <div class="fw-bold d-flex align-items-center gap-1">
                 ${opp.name}
                 ${isLeader ? '<i class="bi bi-flag-fill text-warning" title="Pemimpin Ronde"></i>' : ''}
+                ${isMp && opp.isHost ? '<i class="bi bi-star-fill text-warning ms-1" title="Host"></i>' : ''}
               </div>
               <small class="${isFinished ? 'text-light' : 'text-white-50'}">
                 ${isFinished ? (isLastLoser ? 'Kalah Terakhir' : 'Lolos!') : cardCount + ' kartu'}
@@ -1086,6 +1227,7 @@
 
         // My Hand & Player Pod
         const isHumanFinished = myPlayer.rank !== null;
+        $('#humanAvatarDisplay').text(myPlayer.avatar || '🦊');
         $('#playerNameDisplay').html(`
       ${myPlayer.name} ${isMp && isHost ? '<i class="bi bi-star-fill text-warning ms-1" title="Host"></i>' : ''}
       ${isHumanFinished ? getRankBadgeHtml(myPlayer.rank, myPlayer.isLoser) : ''}
@@ -1155,30 +1297,47 @@
           $('#btnHostStartGame').addClass('d-none');
         }
 
-        if (isMyTurn && gameState.phase === 'PLAYING') {
-          if (!hasSuit) {
-            if (deckCount > 0) {
-              $('#btnHumanDrink').removeClass('d-none');
-              $('#drawPile').addClass('can-drink');
-              $('#deckPrompt').removeClass('d-none');
-              $('#trickStatusMsg').text(`Anda tidak punya kartu ${getSuitObj(gameState.activeSuit).name}. Wajib MINUM!`);
-            } else {
-              if (gameState.trickPlays.length > 0) {
-                $('#btnHumanTakePenalty').removeClass('d-none');
-                $('#trickStatusMsg').html(`<span class="text-danger fw-bold">Minuman habis dan Anda tidak punya kartu ${getSuitObj(gameState.activeSuit).name}! Ambil (${gameState.trickPlays.length}) kartu di meja ini!</span>`);
-              } else {
-                $('#btnHumanSkip').removeClass('d-none');
-                $('#trickStatusMsg').text(`Minuman habis, meja kosong, dan Anda tidak punya kartu yang cocok. Klik Lewat (Skip).`);
-              }
-            }
+        if (gameState.phase === 'ROUND_SUMMARY') {
+          $('#roundSummaryControl').removeClass('d-none');
+          const winInfo = gameState.roundWinnerInfo;
+          if (winInfo) {
+            $('#trickStatusMsg').html(`
+              <span class="text-success fw-bold fs-6">
+                <i class="bi bi-trophy-fill me-1"></i> Kartu Tertinggi: <strong>${winInfo.winnerName}</strong> (${winInfo.cardDisplayName})!
+              </span>
+              <br><small class="text-white-50 d-none">Klik tombol di bawah jika sudah siap melanjutkan ke ronde berikutnya.</small>
+            `);
           } else {
-            $('#trickStatusMsg').text(`Pilih salah satu kartu ${getSuitObj(gameState.activeSuit).name} Anda untuk dikeluarkan.`);
+            $('#trickStatusMsg').html(`<span class="text-info fw-bold">Putaran selesai. Klik tombol di bawah untuk melanjutkan ronde.</span>`);
           }
-        } else if (isMyTurn && gameState.phase === 'CHOOSE_BASE') {
-          $('#trickStatusMsg').text('Pilih 1 kartu dari tangan Anda untuk dijadikan Base baru.');
-        } else if (!isMyTurn && gameState.phase === 'PLAYING' && !(isMp && gameState.roomStatus === 'LOBBY')) {
-          const turnPlayer = gameState.players.find(p => p.id === gameState.turnIndex);
-          $('#trickStatusMsg').text(`Giliran ${turnPlayer ? turnPlayer.name : 'pemain lain'}...`);
+        } else {
+          $('#roundSummaryControl').addClass('d-none');
+
+          if (isMyTurn && gameState.phase === 'PLAYING') {
+            if (!hasSuit) {
+              if (deckCount > 0) {
+                // $('#btnHumanDrink').removeClass('d-none');
+                $('#drawPile').addClass('can-drink');
+                $('#deckPrompt').removeClass('d-none');
+                $('#trickStatusMsg').text(`Anda tidak punya kartu ${getSuitObj(gameState.activeSuit).name}. Wajib MINUM!`);
+              } else {
+                if (gameState.trickPlays.length > 0) {
+                  $('#btnHumanTakePenalty').removeClass('d-none');
+                  $('#trickStatusMsg').html(`<span class="text-danger fw-bold">Minuman habis dan Anda tidak punya kartu ${getSuitObj(gameState.activeSuit).name}! Ambil (${gameState.trickPlays.length}) kartu di meja ini!</span>`);
+                } else {
+                  $('#btnHumanSkip').removeClass('d-none');
+                  $('#trickStatusMsg').text(`Minuman habis, meja kosong, dan Anda tidak punya kartu yang cocok. Klik Lewat (Skip).`);
+                }
+              }
+            } else {
+              // $('#trickStatusMsg').text(`Pilih salah satu kartu ${getSuitObj(gameState.activeSuit).name} Anda untuk dikeluarkan.`);
+            }
+          } else if (isMyTurn && gameState.phase === 'CHOOSE_BASE') {
+            $('#trickStatusMsg').text('Pilih 1 kartu dari tangan Anda untuk dijadikan Base baru.');
+          } else if (!isMyTurn && gameState.phase === 'PLAYING' && !(isMp && gameState.roomStatus === 'LOBBY')) {
+            const turnPlayer = gameState.players.find(p => p.id === gameState.turnIndex);
+            $('#trickStatusMsg').text(`Giliran ${turnPlayer ? turnPlayer.name : 'pemain lain'}...`);
+          }
         }
 
         // Sidebar Info
@@ -1201,6 +1360,7 @@
             lbHtml += `
           <div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center py-1 px-2">
             <div>
+              <span class="me-1">${p.avatar || '👤'}</span>
               <span class="fw-semibold">${p.name}</span>
               ${p.id === myId ? '<span class="badge bg-primary ms-1" style="font-size:10px;">Anda</span>' : ''}
             </div>
@@ -1216,6 +1376,7 @@
           lbHtml += `
         <div class="list-group-item bg-transparent text-white-50 border-secondary d-flex justify-content-between align-items-center py-1 px-2">
           <div>
+            <span class="me-1">${p.avatar || '👤'}</span>
             <span>${p.name}</span>
             ${p.id === myId ? '<span class="badge bg-secondary ms-1" style="font-size:10px;">Anda</span>' : ''}
           </div>
@@ -1241,6 +1402,7 @@
         <div class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between align-items-center py-2">
           <div class="d-flex align-items-center gap-2">
             <span class="fs-5">${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : (isLoser ? '💀' : '🎖️')))}</span>
+            <span class="fs-5">${p.avatar || '👤'}</span>
             <div>
               <strong>${p.name}</strong> ${p.id === myId ? '<span class="badge bg-primary">Anda</span>' : ''}
               ${isLoser ? `<br><small class="text-danger">Kalah Terakhir</small>` : ''}
@@ -1311,7 +1473,7 @@
         });
       }
 
-      function initGameOffline(numPlayers, dealOption, humanName) {
+      function initGameOffline(numPlayers, dealOption, humanName, humanAvatar) {
         mode = 'OFFLINE';
         $('#badgeGameMode').removeClass('bg-primary').addClass('bg-danger').text('Offline (Bot)');
         $('#roomInfoBar').addClass('d-none');
@@ -1331,9 +1493,12 @@
         gameState.isMyTurn = true;
 
         const botNames = ['Budi (Solo)', 'Slamet (Klaten)', 'Joko (Boyolali)', 'Agus (Sragen)', 'Bambang (Wonogiri)', 'Tri (Karanganyar)'];
+        const botAvatars = ['🐱', '🐶', '🦁', '🐼', '🐯', '🐵', '🐨', '🐰'];
+
         gameState.players.push({
           id: 0,
           name: humanName || 'Pemain 1',
+          avatar: humanAvatar || $('#setupPlayerAvatar').val() || $('#inputMpPlayerAvatar').val() || '🦊',
           isHuman: true,
           hand: [],
           rank: null,
@@ -1344,6 +1509,7 @@
           gameState.players.push({
             id: i,
             name: botNames[(i - 1) % botNames.length],
+            avatar: botAvatars[(i - 1) % botAvatars.length],
             isHuman: false,
             hand: [],
             rank: null,
@@ -1549,18 +1715,16 @@
 
           if (checkGameOverOffline()) return;
 
-          if (nextBaseLeader) {
-            gameState.roundLeader = nextBaseLeader.id;
-            gameState.turnIndex = nextBaseLeader.id;
-          }
-          gameState.baseCard = null;
-          gameState.activeSuit = null;
-          gameState.trickPlays = [];
-          gameState.roundNumber++;
-          gameState.phase = 'CHOOSE_BASE';
+          // Jeda agar pemain bisa melihat kartu tertinggi: Masuk ke ROUND_SUMMARY
+          gameState.phase = 'ROUND_SUMMARY';
+          gameState.roundWinnerInfo = {
+            winnerName: roundWinner.name,
+            cardDisplayName: winningPlay.card.displayName,
+            nextLeaderName: nextBaseLeader ? nextBaseLeader.name : roundWinner.name
+          };
+          gameState.offlineNextRoundLeader = nextBaseLeader ? nextBaseLeader.id : 0;
 
           updateUI();
-          runTurnCycleOffline();
         }, 1000);
       }
 
@@ -1573,6 +1737,18 @@
           sortHand(player.hand);
           addLog(`<strong>${player.name}</strong> tidak punya ${getSuitObj(gameState.activeSuit).name} → <strong>MINUM</strong> 1 kartu.`, 'drink');
 
+          if (player.id === 0) {
+            // Human player: tarik 1 kartu per 1x klik, jangan auto minum berulang kali
+            if (drawnCard.suit === gameState.activeSuit) {
+              addLog(`<strong>${player.name}</strong> mendapatkan kartu cocok: <strong>${drawnCard.displayName}</strong>! Silakan klik untuk mengeluarkannya.`, 'play');
+            } else {
+              addLog(`Kartu belum cocok (${drawnCard.displayName}). Klik Minum lagi jika tumpukan kartu masih ada.`, 'info');
+            }
+            updateUI();
+            return;
+          }
+
+          // Bot player: jika cocok auto-play, jika tidak cocok auto-minum lagi setelah jeda botDelay
           if (drawnCard.suit === gameState.activeSuit) {
             addLog(`<strong>${player.name}</strong> langsung mendapatkan kartu cocok: <strong>${drawnCard.displayName}</strong>!`, 'play');
             updateUI();
@@ -1657,11 +1833,21 @@
           gameState.phase = data.phase;
           gameState.rankings = data.rankings;
           gameState.gameOver = data.gameOver;
+          gameState.roundWinnerInfo = data.roundWinnerInfo || null;
 
           const myObj = data.players.find(p => p.id === data.myId);
           isHost = myObj ? myObj.isHost : false;
 
           updateUI();
+
+          // Jika game selesai di mode multiplayer, tampilkan Modal Hasil Akhir otomatis
+          if (data.gameOver && data.rankings && data.rankings.length > 0) {
+            const loserId = data.rankings[data.rankings.length - 1];
+            const loserObj = data.players.find(p => p.id === loserId);
+            showFinalGameOverModal(loserObj);
+          } else if (data.roomStatus === 'LOBBY') {
+            $('#gameOverModal').modal('hide');
+          }
         });
 
         // Event Log dari Server
@@ -1670,10 +1856,35 @@
         });
       }
 
+      // Avatar Picker Interaction (Multiplayer & Offline)
+      $(document).on('click', '.avatar-option-btn', function () {
+        const selectedAvatar = $(this).data('avatar');
+        const container = $(this).closest('.avatar-picker-grid');
+        container.find('.avatar-option-btn').removeClass('selected');
+        $(this).addClass('selected');
+
+        if (container.attr('id') === 'mpAvatarPicker') {
+          $('#inputMpPlayerAvatar').val(selectedAvatar);
+          $('#mpAvatarPreview').text(selectedAvatar);
+          // Sync ke offline juga
+          $('#setupPlayerAvatar').val(selectedAvatar);
+          $('#offlineAvatarPreview').text(selectedAvatar);
+          $('#offlineAvatarPicker .avatar-option-btn').removeClass('selected').filter(`[data-avatar="${selectedAvatar}"]`).addClass('selected');
+        } else {
+          $('#setupPlayerAvatar').val(selectedAvatar);
+          $('#offlineAvatarPreview').text(selectedAvatar);
+          // Sync ke multiplayer juga
+          $('#inputMpPlayerAvatar').val(selectedAvatar);
+          $('#mpAvatarPreview').text(selectedAvatar);
+          $('#mpAvatarPicker .avatar-option-btn').removeClass('selected').filter(`[data-avatar="${selectedAvatar}"]`).addClass('selected');
+        }
+      });
+
       // Buat Room MP
       $('#btnMpCreateRoom').on('click', function () {
         const serverUrl = $('#inputServerUrl').val().trim();
         const playerName = $('#inputMpPlayerName').val().trim() || 'Pemain 1';
+        const playerAvatar = $('#inputMpPlayerAvatar').val() || '🦊';
         const dealOption = $('#inputMpDealCount').val();
 
         if (!serverUrl) {
@@ -1682,7 +1893,7 @@
         }
 
         connectSocket(serverUrl, () => {
-          socket.emit('createRoom', { playerName, dealOption }, (res) => {
+          socket.emit('createRoom', { playerName, playerAvatar, dealOption }, (res) => {
             if (res && res.success) {
               mode = 'MULTIPLAYER';
               mpRoomId = res.roomId;
@@ -1707,6 +1918,7 @@
       $('#btnMpJoinRoom').on('click', function () {
         const serverUrl = $('#inputServerUrl').val().trim();
         const playerName = $('#inputMpPlayerName').val().trim() || 'Pemain';
+        const playerAvatar = $('#inputMpPlayerAvatar').val() || '🐱';
         const roomCode = $('#inputMpRoomCode').val().trim().toUpperCase();
 
         if (!serverUrl) {
@@ -1719,7 +1931,7 @@
         }
 
         connectSocket(serverUrl, () => {
-          socket.emit('joinRoom', { roomId: roomCode, playerName }, (res) => {
+          socket.emit('joinRoom', { roomId: roomCode, playerName, playerAvatar }, (res) => {
             if (res && res.success) {
               mode = 'MULTIPLAYER';
               mpRoomId = res.roomId;
@@ -1755,7 +1967,8 @@
       $('#btnSwitchOffline').on('click', function () {
         if (socket) socket.disconnect();
         $('#multiplayerModal').modal('hide');
-        initGameOffline(4, '4', $('#setupPlayerName').val() || 'Pemain 1');
+        const humanAvatar = $('#setupPlayerAvatar').val() || $('#inputMpPlayerAvatar').val() || '🦊';
+        initGameOffline(4, '4', $('#setupPlayerName').val() || 'Pemain 1', humanAvatar);
       });
 
       // ==========================================
@@ -1897,21 +2110,114 @@
         const playerCount = parseInt($('#setupPlayerCount').val());
         const dealOption = $('#setupDealCount').val();
         const playerName = $('#setupPlayerName').val().trim() || 'Pemain 1';
+        const playerAvatar = $('#setupPlayerAvatar').val() || '🦊';
 
         $('#setupModal').modal('hide');
-        initGameOffline(playerCount, dealOption, playerName);
+        initGameOffline(playerCount, dealOption, playerName, playerAvatar);
       });
 
+      // Tombol Lanjut Ronde Berikutnya (User klik untuk next round setelah jeda kartu tertinggi)
+      $('#btnNextRound').on('click', function () {
+        if (mode === 'MULTIPLAYER') {
+          if (socket && socket.connected) {
+            socket.emit('nextRound');
+          }
+        } else {
+          // Mode Offline
+          if (gameState.phase === 'ROUND_SUMMARY') {
+            const nextLeaderId = gameState.offlineNextRoundLeader !== undefined ? gameState.offlineNextRoundLeader : 0;
+            gameState.roundLeader = nextLeaderId;
+            gameState.turnIndex = nextLeaderId;
+            gameState.baseCard = null;
+            gameState.activeSuit = null;
+            gameState.trickPlays = [];
+            gameState.roundNumber++;
+            gameState.phase = 'CHOOSE_BASE';
+            gameState.roundWinnerInfo = null;
+
+            addLog(`▶️ Ronde #${gameState.roundNumber} dimulai! Giliran <strong>${gameState.players[gameState.roundLeader].name}</strong> menentukan Base baru.`, 'base');
+            updateUI();
+            runTurnCycleOffline();
+          }
+        }
+      });
+
+      // Fitur Salin Link Room (Langsung masuk via ?room=XXXXX)
+      $('#btnCopyRoomCode').on('click', function () {
+        const roomCode = $('#currentRoomCodeDisplay').text().trim();
+        if (!roomCode || roomCode === '-----') return;
+
+        // Buat format URL langsung masuk ?room=XXXXX
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('room', roomCode);
+        const shareLink = currentUrl.toString();
+
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(shareLink).then(() => {
+            showCopySuccess();
+          }).catch(() => {
+            fallbackCopy(shareLink);
+          });
+        } else {
+          fallbackCopy(shareLink);
+        }
+      });
+
+      function showCopySuccess() {
+        const $btn = $('#btnCopyRoomCode');
+        const origText = $btn.html();
+        $btn.removeClass('btn-outline-warning').addClass('btn-success').html('<i class="bi bi-check-lg me-1"></i>Link Tersalin!');
+        setTimeout(() => {
+          $btn.removeClass('btn-success').addClass('btn-outline-warning').html(origText);
+        }, 2000);
+      }
+
+      function fallbackCopy(text) {
+        const $temp = $('<input>');
+        $('body').append($temp);
+        $temp.val(text).select();
+        document.execCommand('copy');
+        $temp.remove();
+        showCopySuccess();
+      }
+
+      // Tombol Main Lagi / Retry (Baik di GameOver modal maupun manual)
       $('#btnRestartAfterOver').on('click', function () {
         if (mode === 'MULTIPLAYER') {
-          $('#multiplayerModal').modal('show');
+          if (socket && socket.connected) {
+            // Minta server untuk reset room state (retry tanpa buat room baru)
+            socket.emit('restartGame', (res) => {
+              $('#gameOverModal').modal('hide');
+            });
+          } else {
+            $('#multiplayerModal').modal('show');
+          }
         } else {
           $('#setupModal').modal('show');
         }
       });
 
-      // Awal muat halaman: mulai offline bot 4 player
+      // Cek apakah ada query param ?room=xxxx di URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlRoomCode = (urlParams.get('room') || '').trim().toUpperCase();
+
+      // Inisialisasi awal
       initGameOffline(4, '4', 'Pemain 1');
+
+      if (urlRoomCode) {
+        // Otomatis arahkan ke Tab Join Room dan isi kodenya
+        $('#inputMpRoomCode').val(urlRoomCode);
+        $('#pills-join-tab').tab('show');
+        setTimeout(() => {
+          $('#multiplayerModal').modal('show');
+          addLog(`🔗 Terdeteksi undangan Room: <strong>${urlRoomCode}</strong>. Masukkan nama lalu klik Join Game Room!`, 'info');
+        }, 350);
+      } else {
+        // Buka popup Buat / Gabung Room Online secara langsung saat pertama kali web dibuka
+        setTimeout(() => {
+          $('#multiplayerModal').modal('show');
+        }, 350);
+      }
 
     });
   </script>
