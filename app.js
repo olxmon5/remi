@@ -31,6 +31,7 @@
       let socket = null;
       let mpRoomId = null;
       let isHost = false;
+      let lastOfflineWinnerId = null;
 
       // Local state for Offline & synced for MP
       let gameState = {
@@ -113,12 +114,16 @@
         $('#speedLabel').text(label);
       });
 
-      function renderCardHtml(card, isPlayable = false, customClass = '') {
+      function renderCardHtml(card, isPlayable = false, customClass = '', isCovered = false) {
         if (!card) return '';
+        const coverHtml = isCovered
+          ? `<div class="card-back-cover"><div class="card-back-pattern"><i class="bi bi-eye-slash-fill text-warning"></i></div></div>`
+          : '';
         return `
       <div class="playing-card ${card.colorClass} ${isPlayable ? 'playable' : ''} ${customClass}" 
            data-card-id="${card.id}" 
            title="${card.rankLabel} of ${card.suitName}">
+        ${coverHtml}
         <div class="card-top">
           <span>${card.rankLabel}</span>
           <span>${card.symbol}</span>
@@ -371,7 +376,7 @@
               }
             }
             const disabledClass = (!isMyTurn || !canPlay) ? 'disabled-card' : '';
-            humanCardsHtml += renderCardHtml(card, canPlay, disabledClass);
+            humanCardsHtml += renderCardHtml(card, canPlay, disabledClass, true);
           });
         }
         $('#humanHandCards').html(humanCardsHtml);
@@ -396,7 +401,15 @@
           $('#waitingRoomLinkText').text(shareLink);
 
           $('#lobbyPlayerCountBadge').text(`${gameState.players.length} Pemain`);
-          $('#lobbyDealDisplay').text(`${gameState.dealOption || '4'} Kartu`);
+          const dealOpt = gameState.dealOption || '4';
+          const dealLabel = dealOpt === 'all' ? 'Bagi Rata' : `${dealOpt} Kartu`;
+          if (isHost) {
+            $('#lobbyDealCountSelect').removeClass('d-none').val(dealOpt);
+            $('#lobbyDealDisplay').addClass('d-none');
+          } else {
+            $('#lobbyDealCountSelect').addClass('d-none');
+            $('#lobbyDealDisplay').removeClass('d-none').text(dealLabel);
+          }
 
           // Render players in lobby
           let lobbyPlayersHtml = '';
@@ -688,8 +701,21 @@
         gameState.baseCard = fullDeck.pop();
         gameState.activeSuit = gameState.baseCard.suit;
         gameState.deck = fullDeck;
-        gameState.roundLeader = 0;
-        gameState.turnIndex = 0;
+
+        // Jika rematch/main lagi dan ada juara 1 game sebelumnya:
+        // pemain juara 1 yang jalan pertama. Jika game pertama: random.
+        let initialLeader = 0;
+        let leaderNote = '';
+        if (lastOfflineWinnerId !== null && gameState.players.some(p => p.id === lastOfflineWinnerId)) {
+          initialLeader = lastOfflineWinnerId;
+          leaderNote = '(Juara 1 Ronde Sebelumnya)';
+        } else {
+          initialLeader = Math.floor(Math.random() * gameState.players.length);
+          leaderNote = '(Acak Ronde Pertama)';
+        }
+
+        gameState.roundLeader = initialLeader;
+        gameState.turnIndex = initialLeader;
         gameState.trickPlays = [];
         gameState.roundPlays = [];
         gameState.roundActedPlayers = [];
@@ -697,7 +723,7 @@
         $('#gameLogs').empty();
         $('#gameOverModal').modal('hide');
         addLog(`Mode Offline vs Bot: ${numPlayers} pemain, ${cardsPerPlayer} kartu/orang.`, 'base');
-        addLog(`Base awal: <strong>${gameState.baseCard.displayName}</strong> (${getSuitObj(gameState.baseCard.suit).name}). Wajib ikuti!`, 'base');
+        addLog(`Base awal: <strong>${gameState.baseCard.displayName}</strong> (${getSuitObj(gameState.baseCard.suit).name}). Giliran pertama: <strong>${gameState.players[initialLeader].name}</strong> ${leaderNote}.`, 'base');
 
         updateUI();
         runTurnCycleOffline();
@@ -708,6 +734,9 @@
           const nextRank = gameState.rankings.length + 1;
           player.rank = nextRank;
           gameState.rankings.push(player.id);
+          if (nextRank === 1) {
+            lastOfflineWinnerId = player.id;
+          }
           addLog(`🎉 <strong>${player.name}</strong> berhasil menghabiskan kartu dan meraih <strong>Peringkat #${nextRank}</strong>!`, 'rank');
           checkGameOverOffline();
           return true;
@@ -1537,6 +1566,18 @@
       // Lobby Start Game button (mirrors host start game)
       $('#btnLobbyStartGame').on('click', function () {
         $('#btnHostStartGame').trigger('click');
+      });
+
+      // Host mengubah jumlah kartu di waiting room
+      $('#lobbyDealCountSelect').on('change', function () {
+        const newDeal = $(this).val();
+        if (mode === 'MULTIPLAYER' && socket && socket.connected && isHost) {
+          socket.emit('changeDealOption', { dealOption: newDeal }, (res) => {
+            if (res && res.message) {
+              alert(res.message);
+            }
+          });
+        }
       });
 
       // Exit Room / Lobby Handler (Screenshot 2 Match)

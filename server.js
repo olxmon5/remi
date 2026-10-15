@@ -395,13 +395,32 @@ io.on('connection', (socket) => {
       turnIndex: 0,
       roundNumber: 1,
       phase: 'PLAYING',
-      gameOver: false
+      gameOver: false,
+      lastWinnerId: null
     };
 
     socket.join(roomId);
     socket.roomId = roomId;
     if (callback) callback({ success: true, roomId });
     sendSanitizedRoomState(roomId);
+  });
+
+  // Host Mengubah Opsi Pembagian Kartu di Waiting Room
+  socket.on('changeDealOption', ({ dealOption }, callback) => {
+    const roomId = socket.roomId;
+    const room = rooms[roomId];
+    if (!room || room.status !== 'LOBBY') return;
+    if (socket.id !== room.hostSocketId) {
+      return callback && callback({ success: false, message: 'Hanya host yang bisa mengubah pengaturan kartu!' });
+    }
+
+    room.dealOption = dealOption || '4';
+    broadcastRoom(roomId, 'gameLog', {
+      type: 'info',
+      msg: `⚙️ Host mengubah pembagian kartu menjadi: <strong>${room.dealOption === 'all' ? 'Habiskan Deck' : room.dealOption + ' Kartu'}</strong>.`
+    });
+    sendSanitizedRoomState(roomId);
+    if (callback) callback({ success: true });
   });
 
   // Gabung Room
@@ -477,16 +496,30 @@ io.on('connection', (socket) => {
     room.trickPlays = [];
     room.roundPlays = [];
     room.roundActedPlayers = [];
-    room.roundLeader = 0;
-    room.turnIndex = 0;
+
+    // Jika rematch/main lagi dan ada juara 1 game sebelumnya:
+    // pemain juara 1 yang jalan pertama. Jika game pertama: random.
+    let startLeader = 0;
+    let leaderReason = '';
+    if (room.lastWinnerId !== null && room.players.some(p => p.id === room.lastWinnerId)) {
+      startLeader = room.lastWinnerId;
+      leaderReason = `(Juara 1 Ronde Sebelumnya)`;
+    } else {
+      startLeader = Math.floor(Math.random() * room.players.length);
+      leaderReason = `(Acak Ronde Pertama)`;
+    }
+
+    room.roundLeader = startLeader;
+    room.turnIndex = startLeader;
     room.roundNumber = 1;
     room.phase = 'PLAYING';
     room.gameOver = false;
     room.status = 'PLAYING';
 
+    const leaderPlayer = room.players.find(p => p.id === startLeader) || room.players[0];
     broadcastRoom(roomId, 'gameLog', {
       type: 'base',
-      msg: `🎮 Game dimulai! Dibagikan ${cardsPerPlayer} kartu/orang. Base awal: <strong>${room.baseCard.displayName}</strong> (${room.baseCard.suitName})`
+      msg: `🎮 Game dimulai! Dibagikan ${cardsPerPlayer} kartu/orang. Base awal: <strong>${room.baseCard.displayName}</strong> (${room.baseCard.suitName}). Giliran pertama: <strong>${leaderPlayer.name}</strong> ${leaderReason}.`
     });
 
     sendSanitizedRoomState(roomId);
@@ -600,6 +633,9 @@ io.on('connection', (socket) => {
       const rank = room.rankings.length + 1;
       curPlayer.rank = rank;
       room.rankings.push(curPlayer.id);
+      if (rank === 1) {
+        room.lastWinnerId = curPlayer.id;
+      }
 
       broadcastRoom(roomId, 'gameLog', {
         type: 'rank',

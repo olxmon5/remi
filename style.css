@@ -803,3 +803,62 @@
       padding: 12px;
       border: 1px solid rgba(255, 255, 255, 0.06);
     }
+
+    /* Kartu di Tangan: Ditutup jika kursor di luar #humanHandCards agar tidak diintip */
+    #humanHandCards {
+      position: relative;
+      transition: background 0.25s ease;
+      border-radius: 12px;
+    }
+
+    /* Tampilan saat kursor di luar: kartu tertutup (motif belakang kartu) */
+    #humanHandCards .playing-card .card-face-content {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      width: 100%;
+      pointer-events: none;
+    }
+
+    #humanHandCards .playing-card .card-back-cover {
+      display: flex;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(45deg,
+          #991b1b,
+          #991b1b 10px,
+          #7f1d1d 10px,
+          #7f1d1d 20px);
+      border-radius: 7px;
+      align-items: center;
+      justify-content: center;
+      z-index: 5;
+      box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+      border: 2px solid #ffffff;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      pointer-events: none;
+    }
+
+    /* Tampilan kartu terbuka saat kursor di dalam #humanHandCards */
+    #humanHandCards:hover .playing-card .card-back-cover {
+      display: none !important;
+      opacity: 0;
+    }
+
+    /* Indikator petunjuk intip */
+    .hand-peek-hint {
+      display: inline-block;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.45);
+      transition: opacity 0.2s ease;
+    }
+    #humanHandCards:hover + .hand-peek-hint,
+    .hand-peek-container:hover .hand-peek-hint {
+      opacity: 0.8;
+      color: #f59e0b;
+    }
+
