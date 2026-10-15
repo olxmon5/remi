@@ -2,436 +2,107 @@
 <html lang="id">
 
 <head>
+  <!-- Character & Viewport -->
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Game Kartu Remi Minuman (Online Multiplayer & Offline Bot)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+  <!-- Primary SEO Meta Tags -->
+  <title>Remi Minuman - Game Kartu Tradisional Online Multiplayer & Offline</title>
+  <meta name="title" content="Remi Minuman - Game Kartu Tradisional Online Multiplayer & Offline">
+  <meta name="description"
+    content="Mainkan game kartu Remi Minuman seru bersama teman secara online real-time atau lawan Bot offline. Lengkap dengan aturan khas Jawa & Solo Raya, responsif dan ringan.">
+  <meta name="keywords"
+    content="remi minuman, game kartu remi, remi online, poker night, multiplayer card game, ceki remi, kartu remi indonesia, permainan remi solo">
+  <meta name="author" content="Remi Minuman">
+  <meta name="robots" content="index, follow">
+
+  <!-- Mobile & PWA Theme Tags -->
+  <meta name="theme-color" content="#0a0e17">
+  <meta name="msapplication-navbutton-color" content="#0a0e17">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Remi Minuman">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://remi-production-1110.up.railway.app/">
+  <meta property="og:title" content="Remi Minuman - Game Kartu Tradisional Online & Offline">
+  <meta property="og:description"
+    content="Mainkan game kartu Remi Minuman seru bersama kawan secara online real-time. Buat private room dan bagikan kodenya!">
+  <meta property="og:image"
+    content="https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=1200&h=630&q=80">
+  <meta property="og:site_name" content="Remi Minuman">
+  <meta property="og:locale" content="id_ID">
+
+  <!-- Twitter -->
+  <meta property="twitter:card" content="summary_large_image">
+  <meta property="twitter:url" content="https://remi-production-1110.up.railway.app/">
+  <meta property="twitter:title" content="Remi Minuman - Game Kartu Tradisional Online">
+  <meta property="twitter:description"
+    content="Main game kartu Remi Minuman online multiplayer & offline bot. Bagikan kode room ke teman sekarang!">
+  <meta property="twitter:image"
+    content="https://images.unsplash.com/photo-1511193311914-0346f16efe90?auto=format&fit=crop&w=1200&h=630&q=80">
+
+  <!-- Favicon (SVG Card Spade Data URI + Emoji) -->
+  <link rel="icon" type="image/svg+xml"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%230f172a'/><text x='50%' y='70%' font-size='60' text-anchor='middle' fill='%23f59e0b'>♠</text></svg>">
+  <link rel="apple-touch-icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%230f172a'/><text x='50%' y='70%' font-size='60' text-anchor='middle' fill='%23f59e0b'>♠</text></svg>">
+
   <!-- Bootstrap 5 CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-  <!-- Google Fonts -->
+  <!-- Google Fonts: Cinzel (Luxury Serif) + Plus Jakarta Sans + JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap"
+  <link
+    href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=JetBrains+Mono:wght@500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
   <!-- Socket.io Client -->
   <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 
-  <style>
-    :root {
-      --felt-green: #0a4d2e;
-      --felt-dark: #062b1a;
-      --felt-border: #137747;
-      --gold-accent: #f59e0b;
-    }
-
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background: radial-gradient(circle at center, #1b382b 0%, #0d1a14 100%);
-      color: #f1f5f9;
-      min-height: 100vh;
-      overflow-x: hidden;
-      user-select: none;
-    }
-
-    /* Table felt styling */
-    .poker-table {
-      background: radial-gradient(ellipse at center, #0e5c36 0%, #083720 70%, #041f12 100%);
-      border: 14px solid #3b2314;
-      box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.8), 0 15px 35px rgba(0, 0, 0, 0.6);
-      border-radius: 40px;
-      min-height: 720px;
-      position: relative;
-      padding: 20px;
-    }
-
-    /* Playing Card Design */
-    .playing-card {
-      width: 78px;
-      height: 114px;
-      background: #ffffff;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      display: inline-flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 6px;
-      font-weight: 700;
-      position: relative;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-      cursor: pointer;
-      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease, border-color 0.2s ease;
-      margin: 0 -14px;
-    }
-
-    .playing-card:hover {
-      transform: translateY(-16px) scale(1.08) !important;
-      box-shadow: 0 12px 20px rgba(0, 0, 0, 0.45);
-      z-index: 100 !important;
-    }
-
-    .playing-card.playable {
-      border: 2px solid #22c55e;
-      box-shadow: 0 0 14px rgba(34, 197, 94, 0.8);
-      animation: pulsePlayable 1.5s infinite alternate;
-    }
-
-    .playing-card.disabled-card {
-      opacity: 0.6;
-      cursor: not-allowed;
-      filter: grayscale(40%);
-    }
-
-    .playing-card.disabled-card:hover {
-      transform: none !important;
-    }
-
-    @keyframes pulsePlayable {
-      0% {
-        box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
-      }
-
-      100% {
-        box-shadow: 0 0 18px rgba(34, 197, 94, 1);
-      }
-    }
-
-    /* Card Back */
-    .card-back {
-      background: repeating-linear-gradient(45deg,
-          #991b1b,
-          #991b1b 10px,
-          #7f1d1d 10px,
-          #7f1d1d 20px);
-      border: 3px solid #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 8px;
-      cursor: default;
-    }
-
-    .card-back-pattern {
-      width: 70%;
-      height: 80%;
-      border: 2px dashed rgba(255, 255, 255, 0.4);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: rgba(255, 255, 255, 0.7);
-    }
-
-    /* Card Suits Color */
-    .suit-hearts,
-    .suit-diamonds {
-      color: #dc2626;
-    }
-
-    .suit-spades,
-    .suit-clubs {
-      color: #1e293b;
-    }
-
-    .card-top {
-      font-size: 13px;
-      line-height: 1;
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-
-    .card-center-suit {
-      font-size: 26px;
-      text-align: center;
-      line-height: 1;
-    }
-
-    .card-bottom {
-      font-size: 13px;
-      line-height: 1;
-      text-align: right;
-      transform: rotate(180deg);
-      display: flex;
-      align-items: center;
-      gap: 2px;
-    }
-
-    /* Center Table Elements */
-    .center-arena {
-      background: rgba(0, 0, 0, 0.35);
-      border-radius: 24px;
-      border: 2px dashed rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(4px);
-      padding: 16px 24px;
-      min-height: 220px;
-    }
-
-    .deck-pile {
-      position: relative;
-      width: 82px;
-      height: 118px;
-      cursor: pointer;
-      perspective: 600px;
-    }
-
-    .deck-pile.can-drink {
-      animation: pulseDrink 1.3s infinite ease-in-out;
-    }
-
-    @keyframes pulseDrink {
-
-      0%,
-      100% {
-        transform: scale(1);
-        filter: drop-shadow(0 0 5px #eab308);
-      }
-
-      50% {
-        transform: scale(1.06);
-        filter: drop-shadow(0 0 16px #fbbf24);
-      }
-    }
-
-    .deck-stack-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      border-radius: 8px;
-    }
-
-    /* Player Pods */
-    .player-pod {
-      background: rgba(15, 23, 42, 0.75);
-      border: 2px solid rgba(255, 255, 255, 0.15);
-      border-radius: 16px;
-      padding: 10px 14px;
-      backdrop-filter: blur(8px);
-      transition: all 0.3s ease;
-      min-width: 160px;
-      position: relative;
-    }
-
-    .player-avatar-circle {
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.35rem;
-      background: rgba(255, 255, 255, 0.1);
-      border: 1.5px solid rgba(255, 255, 255, 0.2);
-      flex-shrink: 0;
-      user-select: none;
-      line-height: 1;
-    }
-
-    /* Avatar Picker Selector */
-    .avatar-picker-grid {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 6px;
-    }
-
-    @media (max-width: 576px) {
-      .avatar-picker-grid {
-        grid-template-columns: repeat(6, 1fr);
-      }
-    }
-
-    .avatar-option-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.5rem;
-      padding: 6px 4px;
-      background: rgba(255, 255, 255, 0.06);
-      border: 2px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      user-select: none;
-    }
-
-    .avatar-option-btn:hover {
-      background: rgba(255, 255, 255, 0.18);
-      border-color: rgba(255, 255, 255, 0.4);
-      transform: scale(1.1);
-    }
-
-    .avatar-option-btn.selected {
-      border-color: #f59e0b;
-      background: rgba(245, 158, 11, 0.25);
-      box-shadow: 0 0 12px rgba(245, 158, 11, 0.6);
-      transform: scale(1.12);
-    }
-
-    .player-pod.active-turn {
-      border-color: #f59e0b;
-      box-shadow: 0 0 20px rgba(245, 158, 11, 0.6);
-      transform: scale(1.04);
-      background: rgba(30, 41, 59, 0.95);
-    }
-
-    .player-pod.finished-pod {
-      border-color: #22c55e;
-      background: rgba(22, 101, 52, 0.85);
-      opacity: 0.9;
-    }
-
-    .player-pod.loser-pod {
-      border-color: #ef4444;
-      background: rgba(127, 29, 29, 0.85);
-      box-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
-    }
-
-    /* Logs & Game Status */
-    .log-box {
-      background: rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      border-radius: 12px;
-      height: 170px;
-      overflow-y: auto;
-      font-size: 13px;
-      line-height: 1.4;
-      padding: 10px;
-    }
-
-    .log-box::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    .log-box::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.25);
-      border-radius: 4px;
-    }
-
-    .current-suit-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 16px;
-      border-radius: 30px;
-      font-weight: 800;
-      font-size: 1.1rem;
-      background: rgba(255, 255, 255, 0.95);
-      color: #0f172a;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-    }
-
-    /* Played round card slot */
-    .played-slot {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin: 0 6px;
-      position: relative;
-    }
-
-    .played-slot.is-base-slot .playing-card {
-      border: 2px solid #f59e0b;
-      box-shadow: 0 0 16px rgba(245, 158, 11, 0.7);
-    }
-
-    .played-slot.is-winner-slot .playing-card {
-      border: 3px solid #22c55e;
-      box-shadow: 0 0 20px rgba(34, 197, 94, 0.9);
-      animation: pulsePlayable 1.2s infinite alternate;
-    }
-
-    .played-slot .slot-name {
-      font-size: 11.5px;
-      margin-top: 5px;
-      color: #cbd5e1;
-      max-width: 90px;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      overflow: hidden;
-      font-weight: 600;
-    }
-
-    /* Rank badges */
-    .rank-badge-1 {
-      background-color: #eab308;
-      color: #000;
-      font-weight: bold;
-    }
-
-    .rank-badge-2 {
-      background-color: #94a3b8;
-      color: #000;
-      font-weight: bold;
-    }
-
-    .rank-badge-3 {
-      background-color: #b45309;
-      color: #fff;
-      font-weight: bold;
-    }
-
-    .rank-badge-last {
-      background-color: #ef4444;
-      color: #fff;
-      font-weight: bold;
-    }
-
-    .rank-badge-default {
-      background-color: #3b82f6;
-      color: #fff;
-      font-weight: bold;
-    }
-
-    .pulse-glow {
-      animation: pulseGlow 1.5s infinite alternate;
-    }
-
-    @keyframes pulseGlow {
-      from {
-        box-shadow: 0 0 5px rgba(245, 158, 11, 0.4);
-      }
-
-      to {
-        box-shadow: 0 0 20px rgba(245, 158, 11, 0.9);
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body class="p-2 p-md-4">
 
   <div class="container-fluid max-w-7xl">
-    <!-- Header / Navigation -->
+    <!-- Header / Navigation (Matching Screenshot 2 Top Bar) -->
     <div
       class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary border-opacity-25">
-      <div>
-        <h2 class="h3 fw-bold mb-0 text-warning d-flex align-items-center gap-2">
-          <i class="bi bi-suit-spade-fill"></i> Remi Minuman
-          <span class="badge bg-danger fs-6 d-none" id="badgeGameMode">Offline (Bot)</span>
-        </h2>
-        <small class="text-white-50 d-none">Sistem Peringkat Juara 1 s/d Kalah Terakhir (Khas Solo Raya /
-          Jateng)</small>
+      <div class="d-flex align-items-center gap-2">
+        <button class="btn-poker-dark btn-sm d-none" id="btnExitRoom" title="Tinggalkan Room">
+          <i class="bi bi-arrow-left me-1"></i> Exit Lobby
+        </button>
+        <div>
+          <h2 class="h4 fw-bold mb-0 text-warning d-flex align-items-center gap-2 font-serif-luxury">
+            <i class="bi bi-suit-spade-fill"></i> Remi Minuman
+            <span class="badge bg-danger fs-6 d-none" id="badgeGameMode">Offline (Bot)</span>
+          </h2>
+          <small class="text-white-50 d-none d-sm-inline" style="font-size: 11.5px;">Game Kartu Tradisional Online
+            Multiplayer & Offline Bot</small>
+        </div>
       </div>
+
       <div class="d-flex flex-wrap gap-2 mt-2 mt-sm-0 align-items-center">
-        <div id="roomInfoBar"
-          class="d-none badge bg-dark border border-warning px-3 py-2 text-warning fs-6 d-flex align-items-center gap-2">
-          <span>Room: <strong id="currentRoomCodeDisplay">-----</strong></span>
-          <button class="btn btn-outline-warning btn-sm py-0 px-2 fw-bold" id="btnCopyRoomCode"
+        <div id="roomInfoBar" class="d-none room-pill-badge">
+          <span>ROOM: <strong id="currentRoomCodeDisplay">-----</strong></span>
+          <button class="btn-poker-gold-outline btn-sm py-0 px-2 fw-bold" id="btnCopyRoomCode"
             title="Salin Link Room untuk Teman">
-            <i class="bi bi-link-45deg me-1"></i>Salin Link
+            <i class="bi bi-copy me-1"></i> Copy
           </button>
         </div>
-        <button class="btn btn-primary btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#multiplayerModal"
+        <button class="btn-gold-cta btn-sm py-2 px-3" data-bs-toggle="modal" data-bs-target="#multiplayerModal"
           id="btnOpenMpModal">
-          <i class="bi bi-door-open me-1"></i> Buat / Gabung Room
+          <i class="bi bi-door-open-fill me-1"></i> Buat / Gabung Room
         </button>
-        <button class="btn btn-outline-light btn-sm d-none" data-bs-toggle="modal" data-bs-target="#rulesModal">
-          <i class="bi bi-book me-1"></i> Aturan
+        <button class="btn-poker-dark btn-sm py-2 px-3" data-bs-toggle="modal" data-bs-target="#rulesModal">
+          <i class="bi bi-journal-text me-1 text-warning"></i> Aturan
         </button>
-        <button class="btn btn-warning btn-sm fw-bold d-none" id="btnOpenSetupModal">
-          <i class="bi bi-robot me-1"></i> Mode Offline (Bot)
+        <button class="btn-poker-dark btn-sm py-2 px-3 d-none" id="btnOpenSetupModal">
+          <i class="bi bi-robot me-1 text-warning"></i> Mode Offline (Bot)
         </button>
       </div>
     </div>
@@ -447,8 +118,78 @@
           </div>
 
           <!-- Center Felt Arena (Cards Played in This Round & Minuman Deck) -->
-          <div class="center-arena my-auto">
-            <div class="row align-items-center">
+          <div class="center-arena my-auto" id="mainCenterArena">
+
+            <!-- Waiting Room View (Multiplayer Lobby - Screenshot 2 Match) -->
+            <div id="mpLobbyArena" class="d-none">
+              <div class="waiting-room-card text-center my-2">
+                <div class="card-suits-banner mb-1">
+                  <span>♠</span><span>♥</span><span>♦</span><span>♣</span>
+                </div>
+                <h3 class="font-serif-luxury text-warning mb-1">Waiting Room</h3>
+                <p class="text-white-50 small mb-3">Ajak teman bergabung menggunakan link di bawah:</p>
+
+                <!-- Invite Link Box -->
+                <div class="text-start mb-3">
+                  <div class="poker-input-label mb-1">
+                    <i class="bi bi-link-45deg text-warning"></i> Link Room Privat:
+                  </div>
+                  <div class="waiting-link-box">
+                    <div class="waiting-link-text" id="waitingRoomLinkText">https://...</div>
+                    <button class="btn-poker-gold-outline btn-sm py-1 px-3" id="btnCopyLobbyLink">
+                      <i class="bi bi-copy me-1"></i> Copy
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Players in Lobby -->
+                <div class="d-flex justify-content-between align-items-center mb-2 px-1">
+                  <span class="poker-input-label mb-0"><i class="bi bi-people-fill text-warning"></i> Pemain di
+                    Lobby</span>
+                  <span class="badge bg-dark border border-secondary text-warning" id="lobbyPlayerCountBadge">1 /
+                    4</span>
+                </div>
+                <div id="lobbyPlayersList" class="mb-3 text-start">
+                  <!-- Injected dynamically -->
+                </div>
+
+                <!-- Game Settings Summary Grid (Like Screenshot 2) -->
+                <div class="room-summary-grid mb-3 text-start">
+                  <div>
+                    <div class="small text-white-50">Game Mode</div>
+                    <div class="fw-bold text-warning">Remi Minuman</div>
+                  </div>
+                  <div>
+                    <div class="small text-white-50">Kartu Awal</div>
+                    <div class="fw-bold text-light" id="lobbyDealDisplay">4 Kartu</div>
+                  </div>
+                  <div>
+                    <div class="small text-white-50">Max Pemain</div>
+                    <div class="fw-bold text-light" id="lobbyMaxPlayersDisplay">4 Players</div>
+                  </div>
+                  <div>
+                    <div class="small text-white-50">Aturan</div>
+                    <div class="fw-bold text-warning">Tradisional Solo</div>
+                  </div>
+                </div>
+
+                <!-- Host Start or Guest Waiting -->
+                <div id="lobbyHostControl">
+                  <button class="btn-gold-cta w-100 py-3" id="btnLobbyStartGame">
+                    <i class="bi bi-play-fill fs-4"></i> Start Game
+                  </button>
+                  <small class="text-white-50 d-block mt-2">Hanya Host yang dapat memulai permainan</small>
+                </div>
+                <div id="lobbyGuestControl" class="d-none">
+                  <div class="alert alert-dark border-secondary bg-dark bg-opacity-50 text-warning mb-0 py-2">
+                    <i class="bi bi-hourglass-split me-1"></i> Menunggu Host memulai permainan...
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Standard Playing Arena (When game is running) -->
+            <div id="centerPlayArena" class="row align-items-center">
 
               <!-- Center: Cards Played in This Round (Termasuk Base Card) -->
               <div class="col-md-9 text-center mb-3 mb-md-0">
@@ -456,7 +197,7 @@
                   <div class="small text-white-50 text-uppercase fw-bold">
                     Kartu di Meja (<span id="roundProgress">0/0</span>)
                   </div>
-                  <div id="currentSuitBadgeContainer d-none">
+                  <div id="currentSuitBadgeContainer" class="d-none">
                     <!-- Current target suit badge -->
                   </div>
                 </div>
@@ -471,7 +212,7 @@
 
                 <!-- Tombol Lanjut Ronde Baru Saat Evaluasi Selesai (Jeda Melihat Kartu Tertinggi) -->
                 <div id="roundSummaryControl" class="mt-2 d-none">
-                  <button id="btnNextRound" class="btn btn-warning fw-bold px-4 py-2 shadow pulse-glow">
+                  <button id="btnNextRound" class="btn-gold-cta px-4 py-2 shadow pulse-glow">
                     <i class="bi bi-arrow-right-circle-fill me-1"></i> Next Round
                   </button>
                 </div>
@@ -479,7 +220,7 @@
 
               <!-- Right: Tumpukan "Minuman" (Deck Pile) -->
               <div class="col-md-3 text-center border-start border-secondary border-opacity-25">
-                <div class="small text-white-50 text-uppercase fw-bold mb-2">Tumpukan "Minuman"</div>
+                <div class="small text-white-50 text-uppercase fw-bold mb-2">Minuman</div>
                 <div class="d-flex flex-column align-items-center">
                   <div id="drawPile" class="deck-pile" title="Klik untuk ambil kartu (Minum)">
                     <!-- 3D stack effect layers -->
@@ -526,19 +267,23 @@
                 </div>
               </div>
 
-              <!-- Action buttons for player -->
-              <div class="d-flex gap-2">
-                <button id="btnHostStartGame" class="btn btn-success fw-bold d-none">
+              <!-- Action buttons for player (Redesigned) -->
+              <div class="d-flex flex-wrap gap-2">
+                <button id="btnHostStartGame" class="btn-gold-cta btn-sm d-none">
                   <i class="bi bi-play-circle-fill me-1"></i> Mulai Game Sekarang (Host)
                 </button>
-                <button id="btnHumanDrink" class="btn btn-warning fw-bold d-none">
+                <button id="btnReorderHand" class="btn-gold-cta btn-poker-subtle btn-sm py-2 px-3"
+                  title="Rapikan / Urutkan kartu di tangan">
+                  <i class="bi bi-arrow-left-right me-1"></i> Rapikan Kartu
+                </button>
+                <button id="btnHumanDrink" class="btn-action-drink d-none">
                   <i class="bi bi-cup-straw me-1"></i> Minum (Ambil Kartu)
                 </button>
-                <button id="btnHumanTakePenalty" class="btn btn-danger fw-bold d-none">
-                  <i class="bi bi-box-arrow-in-down me-1"></i> Ambil Kartu Meja (Penalti Minuman)
+                <button id="btnHumanTakePenalty" class="btn-action-penalty d-none">
+                  <i class="bi bi-box-arrow-in-down me-1"></i> Ambil Meja (Penalti)
                 </button>
-                <button id="btnHumanSkip" class="btn btn-outline-danger fw-bold d-none">
-                  <i class="bi bi-skip-forward me-1"></i> Lewat (Skip)
+                <button id="btnHumanSkip" class="btn-action-skip d-none">
+                  <i class="bi bi-skip-forward-fill me-1"></i> Lewat (Skip)
                 </button>
               </div>
             </div>
@@ -621,112 +366,129 @@
     </div>
   </div>
 
-  <!-- Modal: Setup Multiplayer (Railway Server & Room) -->
+  <!-- Modal: Setup Multiplayer (Screenshot 1 Match) -->
   <div class="modal fade" id="multiplayerModal" tabindex="-1" aria-labelledby="multiplayerModalLabel"
     aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-light border-primary">
-        <div class="modal-header border-secondary">
-          <h5 class="modal-title text-primary fw-bold" id="multiplayerModalLabel">
-            <i class="bi bi-globe me-2"></i> Remi Minuman
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 490px;">
+      <div class="modal-content poker-modal-content">
+        <!-- Center Card Suits & Brand Header -->
+        <div class="poker-modal-header text-center">
+          <button type="button" class="btn-close-poker position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"
+            aria-label="Close">
+            <i class="bi bi-x-lg"></i>
+          </button>
+          <div class="card-suits-banner">
+            <span>♠</span><span>♥</span><span>♦</span><span>♣</span>
+          </div>
+          <h3 class="poker-modal-title mb-1">Remi Minuman</h3>
+          <p class="text-white-50 small mb-0">Real-time game kartu remi dengan teman, kapan saja</p>
         </div>
-        <div class="modal-body">
+
+        <div class="modal-body p-4 pt-3">
           <!-- URL Server Backend (Disembunyikan / Hidden default) -->
           <div class="mb-3 d-none">
-            <label class="form-label fw-semibold">URL Server Backend:</label>
-            <input type="text" class="form-control bg-dark text-light border-secondary" id="inputServerUrl"
+            <label class="poker-input-label">URL Server Backend:</label>
+            <input type="text" class="form-control poker-form-control" id="inputServerUrl"
               value="https://remi-production-1110.up.railway.app">
           </div>
 
+          <!-- Tabs: Create Room vs Join Room (Like Screenshot 1) -->
+          <ul class="nav poker-tabs-nav" id="pills-tab" role="tablist">
+            <li class="poker-tab-item">
+              <button class="nav-link poker-tab-btn active" id="pills-create-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-create" type="button">
+                <i class="bi bi-shield-plus me-1"></i> Create Room
+              </button>
+            </li>
+            <li class="poker-tab-item">
+              <button class="nav-link poker-tab-btn" id="pills-join-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-join" type="button">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Join Room
+              </button>
+            </li>
+          </ul>
+
+          <!-- Player Name Field -->
           <div class="mb-3">
-            <label class="form-label fw-semibold">Pilih Avatar:</label>
-            <div class="avatar-picker-grid" id="mpAvatarPicker">
-              <div class="avatar-option-btn selected" data-avatar="🦊">🦊</div>
-              <div class="avatar-option-btn" data-avatar="🐱">🐱</div>
-              <div class="avatar-option-btn" data-avatar="🐶">🐶</div>
-              <div class="avatar-option-btn" data-avatar="🦁">🦁</div>
-              <div class="avatar-option-btn" data-avatar="🐼">🐼</div>
-              <div class="avatar-option-btn" data-avatar="🐯">🐯</div>
-              <div class="avatar-option-btn" data-avatar="🐸">🐸</div>
-              <div class="avatar-option-btn" data-avatar="🐵">🐵</div>
-              <div class="avatar-option-btn" data-avatar="🐰">🐰</div>
-              <div class="avatar-option-btn" data-avatar="🐨">🐨</div>
-              <div class="avatar-option-btn" data-avatar="🐧">🐧</div>
-              <div class="avatar-option-btn" data-avatar="🦉">🦉</div>
-              <div class="avatar-option-btn" data-avatar="🦄">🦄</div>
-              <div class="avatar-option-btn" data-avatar="🐲">🐲</div>
-              <div class="avatar-option-btn" data-avatar="🐺">🐺</div>
-              <div class="avatar-option-btn" data-avatar="🤖">🤖</div>
+            <label class="poker-input-label"><i class="bi bi-person-fill text-warning"></i> Nama Anda</label>
+            <div class="input-group">
+              <span class="input-group-text text-light fs-5 py-1 px-3" id="mpAvatarPreview"
+                style="background: #0f1421 !important; border-color: #0f1421 !important;">🦊</span>
+              <input type="text" class="form-control poker-form-control fw-semibold" id="inputMpPlayerName"
+                maxlength="15" placeholder="Masukkan nama Anda (misal: Rijal)">
+              <button class="btn btn-poker-subtle" type="button" id="btnRandomMpName" title="Acak Nama">
+                🎲
+              </button>
+            </div>
+          </div>
+
+          <!-- Avatar Picker (Circular Avatar Row, Screenshot 1 Match) -->
+          <div class="mb-3">
+            <label class="poker-input-label"><i class="bi bi-emoji-smile text-warning"></i> Pilih Avatar</label>
+            <div class="avatar-picker-circular avatar-picker-grid" id="mpAvatarPicker">
+              <div class="avatar-circle-btn avatar-option-btn selected" data-avatar="🦊">🦊</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐱">🐱</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐶">🐶</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🦁">🦁</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐯">🐯</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐸">🐸</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐰">🐰</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐨">🐨</div>
             </div>
             <input type="hidden" id="inputMpPlayerAvatar" value="🦊">
           </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Nama Pemain:</label>
-            <div class="input-group">
-              <span class="input-group-text bg-secondary border-secondary text-light fs-5 py-1 px-2" id="mpAvatarPreview">🦊</span>
-              <input type="text" class="form-control border-secondary fw-semibold" id="inputMpPlayerName" maxlength="15"
-                placeholder="Contoh : Yuuta">
-            </div>
-          </div>
-
-          <hr class="border-secondary">
-
-          <!-- Tabs: Create Room vs Join Room -->
-          <ul class="nav nav-pills nav-fill mb-3" id="pills-tab" role="tablist">
-            <li class="nav-item">
-              <button class="nav-link active fw-bold" id="pills-create-tab" data-bs-toggle="pill"
-                data-bs-target="#pills-create" type="button">Create Room</button>
-            </li>
-            <li class="nav-item">
-              <button class="nav-link fw-bold" id="pills-join-tab" data-bs-toggle="pill" data-bs-target="#pills-join"
-                type="button">Join Room</button>
-            </li>
-          </ul>
-
           <div class="tab-content">
             <!-- Tab 1: Create Room -->
             <div class="tab-pane fade show active" id="pills-create">
-              <div class="mb-3">
-                <label class="form-label fw-semibold">Pembagian Kartu Awal:</label>
-                <select class="form-select bg-dark text-light border-secondary" id="inputMpDealCount">
-                  <option value="1">1 Kartu saja</option>
-                  <option value="2">2 Kartu</option>
-                  <option value="3">3 Kartu</option>
-                  <option value="4" selected>4 Kartu</option>
-                  <option value="5">5 Kartu</option>
-                  <option value="7">7 Kartu</option>
-                  <option value="all">Bagi Rata (Sisa 1 untuk Base)</option>
-                </select>
+              <div class="row g-2 mb-3">
+                <div class="col-12">
+                  <label class="poker-input-label"><i class="bi bi-card-text text-warning"></i> Kartu Awal
+                    (Deal)</label>
+                  <select class="form-select poker-form-select" id="inputMpDealCount">
+                    <option value="1">1 Kartu saja</option>
+                    <option value="2">2 Kartu</option>
+                    <option value="3">3 Kartu</option>
+                    <option value="4" selected>4 Kartu</option>
+                    <option value="5">5 Kartu</option>
+                    <option value="7">7 Kartu</option>
+                    <option value="all">Bagi Rata</option>
+                  </select>
+                </div>
               </div>
-              <button type="button" class="btn btn-primary w-100 fw-bold py-2" id="btnMpCreateRoom">
-                <i class="bi bi-plus-circle me-1"></i> Create Private Room
+              <button type="button" class="btn-gold-cta w-100 py-2 mb-2" id="btnMpCreateRoom">
+                <i class="bi bi-shield-lock-fill fs-5"></i> Create Private Room
               </button>
+              <div class="text-center text-white-50 small mt-2">
+                <i class="bi bi-link-45deg me-1"></i> Link room privat akan dibuat otomatis
+              </div>
             </div>
 
             <!-- Tab 2: Join Room -->
             <div class="tab-pane fade" id="pills-join">
               <div class="mb-3">
-                <label class="form-label fw-semibold">Masukkan Kode Room (5 Huruf/Angka):</label>
-                <input type="text"
-                  class="form-control bg-dark text-light border-secondary text-uppercase fw-bold fs-5 text-center"
+                <label class="poker-input-label text-center d-block"><i class="bi bi-key-fill text-warning"></i>
+                  Masukkan Kode Room (5 Huruf/Angka)</label>
+                <input type="text" class="form-control poker-form-control poker-input-room-code py-2"
                   id="inputMpRoomCode" placeholder="ABCDE" maxlength="5">
               </div>
-              <button type="button" class="btn btn-success w-100 fw-bold py-2" id="btnMpJoinRoom">
-                <i class="bi bi-door-open me-1"></i> Join Game Room
+              <button type="button" class="btn-gold-cta w-100 py-3 mb-2" id="btnMpJoinRoom">
+                <i class="bi bi-door-open-fill fs-5"></i> Join Game Room
               </button>
+              <div class="text-center text-white-50 small mt-2">
+                <i class="bi bi-info-circle me-1"></i> Masukkan 5 karakter kode room dari teman Anda
+              </div>
             </div>
           </div>
 
           <div id="mpConnectionStatus" class="mt-3 text-center small"></div>
-        </div>
-        <div class="modal-footer border-secondary justify-content-between d-none">
-          <button type="button" class="btn btn-outline-warning btn-sm" id="btnSwitchOffline">
-            <i class="bi bi-robot me-1"></i> Beralih ke Mode Offline (Bot)
-          </button>
-          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Tutup</button>
+
+          <hr class="border-secondary border-opacity-25 my-3">
+          <div>
+            <button type="button" class="btn-poker-dark w-100 py-2" id="btnSwitchOffline">
+              <i class="bi bi-robot text-warning me-1"></i> Main Mode Offline (Lawan Bot)
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -735,26 +497,30 @@
   <!-- Modal: Final Game Over / Hasil Akhir Lengkap Peringkat -->
   <div class="modal fade" id="gameOverModal" tabindex="-1" aria-labelledby="gameOverModalLabel" aria-hidden="true"
     data-bs-backdrop="static">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-light border-warning">
-        <div class="modal-header border-secondary bg-black bg-opacity-50">
-          <h5 class="modal-title text-warning fw-bold" id="gameOverModalLabel">
-            <i class="bi bi-trophy-fill me-2"></i> Hasil Akhir Permainan Remi Minuman
-          </h5>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 500px;">
+      <div class="modal-content poker-modal-content">
+        <div class="poker-modal-header text-center">
+          <div class="card-suits-banner">
+            <span>♠</span><span>♥</span><span>♦</span><span>♣</span>
+          </div>
+          <h4 class="poker-modal-title mb-1">
+            <i class="bi bi-trophy-fill text-warning me-2"></i> Hasil Akhir Permainan
+          </h4>
+          <p class="text-white-50 small mb-0">Seluruh peringkat dari Juara Pertama hingga Kalah Terakhir</p>
         </div>
-        <div class="modal-body">
-          <p class="text-white-50 mb-3 text-center">Permainan telah selesai! Seluruh peringkat dari Juara Pertama hingga
-            Kalah Terakhir telah ditentukan:</p>
+        <div class="modal-body p-4">
           <div class="list-group list-group-flush mb-3" id="finalRankingsList">
             <!-- Final standings injected here -->
           </div>
-          <div class="alert alert-danger bg-opacity-25 border-danger text-center mb-0" id="finalLoserAlert">
+          <div
+            class="alert alert-danger bg-danger bg-opacity-10 border border-danger border-opacity-50 text-center mb-0 rounded-4"
+            id="finalLoserAlert">
             <!-- Loser notice -->
           </div>
         </div>
-        <div class="modal-footer border-secondary justify-content-center">
-          <button type="button" class="btn btn-warning fw-bold px-4" data-bs-dismiss="modal" id="btnRestartAfterOver">
-            <i class="bi bi-arrow-repeat me-1"></i> Main Lagi
+        <div class="p-3 text-center border-top border-secondary border-opacity-25">
+          <button type="button" class="btn-gold-cta px-5 py-2" data-bs-dismiss="modal" id="btnRestartAfterOver">
+            <i class="bi bi-arrow-repeat me-1 fs-5"></i> Main Lagi
           </button>
         </div>
       </div>
@@ -763,85 +529,93 @@
 
   <!-- Modal: Setup / Game Baru (Offline Mode) -->
   <div class="modal fade" id="setupModal" tabindex="-1" aria-labelledby="setupModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-      <div class="modal-content bg-dark text-light border-secondary">
-        <div class="modal-header border-secondary">
-          <h5 class="modal-title text-warning fw-bold" id="setupModalLabel">
-            <i class="bi bi-gear-fill me-2"></i> Pengaturan Game Offline (Lawan Bot)
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+      <div class="modal-content poker-modal-content">
+        <div class="poker-modal-header text-center">
+          <button type="button" class="btn-close-poker position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"
+            aria-label="Close">
+            <i class="bi bi-x-lg"></i>
+          </button>
+          <div class="card-suits-banner">
+            <span>♠</span><span>♥</span><span>♦</span><span>♣</span>
+          </div>
+          <h4 class="poker-modal-title mb-1">
+            <i class="bi bi-robot text-warning me-2"></i> Pengaturan Game Offline (Bot)
+          </h4>
+          <p class="text-white-50 small mb-0">Bermain santai melawan Bot AI cerdas</p>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-4 pt-3">
           <div class="mb-3">
-            <label class="form-label fw-semibold">Jumlah Pemain (2 s/d 7):</label>
+            <label class="poker-input-label"><i class="bi bi-person-fill text-warning"></i> Nama Anda</label>
             <div class="input-group">
-              <span class="input-group-text bg-secondary border-secondary text-light"><i
-                  class="bi bi-people-fill"></i></span>
-              <select class="form-select bg-dark text-light border-secondary" id="setupPlayerCount">
-                <option value="2">2 Pemain (Anda + 1 Bot)</option>
-                <option value="3">3 Pemain (Anda + 2 Bot)</option>
-                <option value="4" selected>4 Pemain (Anda + 3 Bot) - Standar</option>
-                <option value="5">5 Pemain (Anda + 4 Bot)</option>
-                <option value="6">6 Pemain (Anda + 5 Bot)</option>
-                <option value="7">7 Pemain (Anda + 6 Bot)</option>
-              </select>
+              <span class="input-group-text text-light fs-5 py-1 px-3" id="offlineAvatarPreview"
+                style="background: #090e17 !important; border-color: rgba(255,255,255,0.14) !important;">🦊</span>
+              <input type="text" class="form-control poker-form-control fw-semibold" id="setupPlayerName" value="Saya"
+                maxlength="15">
+              <button class="btn btn-outline-warning btn-poker-subtle" type="button" id="btnRandomOfflineName"
+                title="Acak Nama">
+                <i class="bi bi-dice-5-fill me-1"></i> Acak
+              </button>
             </div>
           </div>
 
           <div class="mb-3">
-            <label class="form-label fw-semibold">Pembagian Kartu Awal Tiap Orang:</label>
-            <div class="input-group">
-              <span class="input-group-text bg-secondary border-secondary text-light"><i
-                  class="bi bi-card-text"></i></span>
-              <select class="form-select bg-dark text-light border-secondary" id="setupDealCount">
-                <option value="1">1 Kartu saja</option>
-                <option value="2">2 Kartu</option>
-                <option value="3">3 Kartu</option>
-                <option value="4" selected>4 Kartu (Populer di Solo)</option>
-                <option value="5">5 Kartu</option>
-                <option value="7">7 Kartu</option>
-                <option value="all">Bagi Rata Habis (Sisa 1 untuk Base)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Pilih Avatar:</label>
-            <div class="avatar-picker-grid" id="offlineAvatarPicker">
-              <div class="avatar-option-btn selected" data-avatar="🦊">🦊</div>
-              <div class="avatar-option-btn" data-avatar="🐱">🐱</div>
-              <div class="avatar-option-btn" data-avatar="🐶">🐶</div>
-              <div class="avatar-option-btn" data-avatar="🦁">🦁</div>
-              <div class="avatar-option-btn" data-avatar="🐼">🐼</div>
-              <div class="avatar-option-btn" data-avatar="🐯">🐯</div>
-              <div class="avatar-option-btn" data-avatar="🐸">🐸</div>
-              <div class="avatar-option-btn" data-avatar="🐵">🐵</div>
-              <div class="avatar-option-btn" data-avatar="🐰">🐰</div>
-              <div class="avatar-option-btn" data-avatar="🐨">🐨</div>
-              <div class="avatar-option-btn" data-avatar="🐧">🐧</div>
-              <div class="avatar-option-btn" data-avatar="🦉">🦉</div>
-              <div class="avatar-option-btn" data-avatar="🦄">🦄</div>
-              <div class="avatar-option-btn" data-avatar="🐲">🐲</div>
-              <div class="avatar-option-btn" data-avatar="🐺">🐺</div>
-              <div class="avatar-option-btn" data-avatar="🤖">🤖</div>
+            <label class="poker-input-label"><i class="bi bi-emoji-smile text-warning"></i> Pilih Avatar</label>
+            <div class="avatar-picker-circular avatar-picker-grid" id="offlineAvatarPicker">
+              <div class="avatar-circle-btn avatar-option-btn selected" data-avatar="🦊">🦊</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐱">🐱</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐶">🐶</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🦁">🦁</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐼">🐼</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐯">🐯</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐸">🐸</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐵">🐵</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐰">🐰</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐨">🐨</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐧">🐧</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🦉">🦉</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🦄">🦄</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐲">🐲</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🐺">🐺</div>
+              <div class="avatar-circle-btn avatar-option-btn" data-avatar="🤖">🤖</div>
             </div>
             <input type="hidden" id="setupPlayerAvatar" value="🦊">
           </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Nama Anda:</label>
-            <div class="input-group">
-              <span class="input-group-text bg-secondary border-secondary text-light fs-5 py-1 px-2" id="offlineAvatarPreview">🦊</span>
-              <input type="text" class="form-control bg-dark text-light border-secondary" id="setupPlayerName"
-                value="Pemain 1" maxlength="15">
+          <div class="row g-2 mb-4">
+            <div class="col-6">
+              <label class="poker-input-label"><i class="bi bi-people-fill text-warning"></i> Jumlah Pemain</label>
+              <select class="form-select poker-form-select" id="setupPlayerCount">
+                <option value="2">2 Pemain (1 Bot)</option>
+                <option value="3">3 Pemain (2 Bot)</option>
+                <option value="4" selected>4 Pemain (Standar)</option>
+                <option value="5">5 Pemain (4 Bot)</option>
+                <option value="6">6 Pemain (5 Bot)</option>
+                <option value="7">7 Pemain (6 Bot)</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="poker-input-label"><i class="bi bi-card-text text-warning"></i> Kartu Awal</label>
+              <select class="form-select poker-form-select" id="setupDealCount">
+                <option value="1">1 Kartu saja</option>
+                <option value="2">2 Kartu</option>
+                <option value="3">3 Kartu</option>
+                <option value="4" selected>4 Kartu (Solo)</option>
+                <option value="5">5 Kartu</option>
+                <option value="7">7 Kartu</option>
+                <option value="all">Bagi Rata</option>
+              </select>
             </div>
           </div>
-        </div>
-        <div class="modal-footer border-secondary">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-          <button type="button" class="btn btn-warning fw-bold" id="btnStartNewGameOffline">
-            <i class="bi bi-play-fill me-1"></i> Mulai Game Offline
-          </button>
+
+          <div class="d-flex gap-2">
+            <button type="button" class="btn-poker-dark flex-grow-1 py-2" data-bs-dismiss="modal">
+              <i class="bi bi-x-lg me-1"></i> Batal
+            </button>
+            <button type="button" class="btn-gold-cta flex-grow-1 py-2" id="btnStartNewGameOffline">
+              <i class="bi bi-play-circle-fill me-1"></i> Mulai Game
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -850,58 +624,91 @@
   <!-- Modal: Rules / Aturan Main Solo Raya -->
   <div class="modal fade" id="rulesModal" tabindex="-1" aria-labelledby="rulesModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
-      <div class="modal-content bg-dark text-light border-secondary">
-        <div class="modal-header border-secondary">
-          <h5 class="modal-title text-warning fw-bold" id="rulesModalLabel">
-            <i class="bi bi-book-half me-2"></i> Aturan Main Remi "Minuman" (Sistem Peringkat Jateng)
-          </h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div class="modal-content poker-modal-content">
+        <div class="poker-modal-header text-center">
+          <button type="button" class="btn-close-poker position-absolute top-0 end-0 m-3" data-bs-dismiss="modal"
+            aria-label="Close">
+            <i class="bi bi-x-lg"></i>
+          </button>
+          <div class="card-suits-banner">
+            <span>♠</span><span>♥</span><span>♦</span><span>♣</span>
+          </div>
+          <h4 class="poker-modal-title mb-1">
+            <i class="bi bi-book-half text-warning me-2"></i> Aturan Main Remi "Minuman"
+          </h4>
+          <p class="text-white-50 small mb-0">Sistem Peringkat Juara 1 s/d Kalah Terakhir (Khas Solo Raya & Jateng)</p>
         </div>
-        <div class="modal-body" style="font-size: 14.5px; line-height: 1.6;">
-          <ul class="list-group list-group-flush bg-transparent">
-            <li class="list-group-item bg-transparent text-light border-secondary">
-              <strong class="text-warning">1. Komposisi Kartu & Awal Permainan:</strong>
-              <br>Menggunakan 1 dek remi standar (52 kartu, tanpa joker). Semua pemain dibagikan jumlah kartu yang sama
-              (1, 2, 3, 4, atau dibagi rata).
-              <strong>Wajib ada 1 kartu dibuka di tengah sebagai "Base" awal</strong>, dan sisa kartu ditutup di tengah
-              sebagai tumpukan <strong>"Minuman"</strong>.
-            </li>
-            <li class="list-group-item bg-transparent text-light border-secondary">
-              <strong class="text-warning">2. Mengikuti Bentuk (Suit) Base:</strong>
-              <br>Permainan berputar searah jarum jam di antara pemain aktif. Pemain <strong>wajib mengeluarkan kartu
-                dengan bentuk/kembang yang sama</strong> dengan kartu base (misal: jika base Hati ♥, wajib mengeluarkan
-              Hati ♥).
-            </li>
-            <li class="list-group-item bg-transparent text-light border-secondary">
-              <strong class="text-warning">3. Penentuan Pemenang Ronde & Base Baru:</strong>
-              <br>Setelah semua pemain aktif mengeluarkan kartunya di ronde tersebut, <strong>kartu dengan angka
+        <div class="modal-body p-4" style="font-size: 14.5px; line-height: 1.6;">
+          <div class="p-3 mb-3 rounded-4"
+            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-warning text-dark fw-bold px-2 py-1">#1</span>
+              <strong class="text-warning">Komposisi Kartu & Awal Permainan</strong>
+            </div>
+            <p class="text-light mb-0 small ps-4">
+              Menggunakan 1 dek remi standar (52 kartu, tanpa joker). Semua pemain dibagikan jumlah kartu yang sama (1,
+              2, 3, 4, atau dibagi rata). <strong>Wajib ada 1 kartu dibuka di tengah sebagai "Base" awal</strong>, dan
+              sisa kartu ditutup di tengah sebagai tumpukan <strong>"Minuman"</strong>.
+            </p>
+          </div>
+
+          <div class="p-3 mb-3 rounded-4"
+            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-warning text-dark fw-bold px-2 py-1">#2</span>
+              <strong class="text-warning">Mengikuti Bentuk (Suit) Base</strong>
+            </div>
+            <p class="text-light mb-0 small ps-4">
+              Permainan berputar searah jarum jam di antara pemain aktif. Pemain <strong>wajib mengeluarkan kartu dengan
+                bentuk/kembang yang sama</strong> dengan kartu base (misal: jika base Hati ♥, wajib mengeluarkan Hati
+              ♥).
+            </p>
+          </div>
+
+          <div class="p-3 mb-3 rounded-4"
+            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-warning text-dark fw-bold px-2 py-1">#3</span>
+              <strong class="text-warning">Penentuan Pemenang Ronde & Base Baru</strong>
+            </div>
+            <p class="text-light mb-0 small ps-4">
+              Setelah semua pemain aktif mengeluarkan kartunya di ronde tersebut, <strong>kartu dengan angka
                 tertinggi</strong> (urutan: 2 terendah s/d As tertinggi) memenangkan ronde tersebut dan berhak
               mengeluarkan 1 kartu baru dari tangannya sebagai <strong>Base Baru</strong>.
-              <br><em>*Jika pemain yang memenangkan ronde kartunya habis tepat saat itu, hak membuat Base baru beralih
-                ke pemilik kartu tertinggi kedua yang masih punya kartu.</em>
-            </li>
-            <li class="list-group-item bg-transparent text-light border-secondary">
-              <strong class="text-warning">4. Mekanisme "Minum" (Draw) & Penalti Meja:</strong>
-              <ul class="mt-1 ps-3">
-                <li>Jika pemain <strong>TIDAK MEMILIKI</strong> bentuk yang diminta, wajib <strong>"Minum"</strong>
-                  (ambil kartu tertutup dari tumpukan minuman) satu demi satu sampai mendapatkan bentuk yang cocok.</li>
-                <li>Jika tumpukan minuman <strong>habis</strong> dan pemain tersebut tetap tidak dapat kartu cocok, maka
-                  <strong>semua kartu yang sudah dikeluarkan pemain lain di ronde tersebut harus diambil semua oleh
-                    pemain itu ke tangannya</strong>!
-                </li>
-                <li>Jika tumpukan minuman sudah habis sejak awal, meja kosong, dan dia tidak punya bentuk itu, barulah
-                  pemain itu <strong>di-skip / lewat</strong>.</li>
-              </ul>
-            </li>
-            <li class="list-group-item bg-transparent text-light border-secondary">
-              <strong class="text-warning">5. Konsep Peringkat & Kalah Terakhir:</strong>
-              <br>Pemain pertama yang kartunya habis = <strong>Juara 1</strong>. Permainan terus berlanjut sampai
-              tersisa <strong>1 pemain terakhir yang gagal menghabiskan kartunya (Kalah Terakhir / Juru Kunci)</strong>!
-            </li>
-          </ul>
+            </p>
+          </div>
+
+          <div class="p-3 mb-3 rounded-4"
+            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-warning text-dark fw-bold px-2 py-1">#4</span>
+              <strong class="text-warning">Mekanisme "Minum" (Draw) & Penalti Meja</strong>
+            </div>
+            <p class="text-light mb-0 small ps-4">
+              • Jika pemain <strong>tidak memiliki bentuk yang diminta</strong>, wajib <strong>"Minum"</strong> (ambil
+              kartu tertutup dari tumpukan minuman) satu demi satu sampai mendapatkan bentuk yang cocok.<br>
+              • Jika tumpukan minuman habis dan tetap tidak cocok, <strong>semua kartu yang sudah dikeluarkan pemain
+                lain di ronde tersebut harus diambil semua ke tangannya</strong>!<br>
+              • Jika tumpukan minuman sudah habis, meja kosong, barulah pemain di-skip/lewat.
+            </p>
+          </div>
+
+          <div class="p-3 rounded-4"
+            style="background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <span class="badge bg-warning text-dark fw-bold px-2 py-1">#5</span>
+              <strong class="text-warning">Konsep Peringkat & Kalah Terakhir</strong>
+            </div>
+            <p class="text-light mb-0 small ps-4">
+              Pemain pertama yang kartunya habis = <strong>Juara 1</strong>. Permainan terus berlanjut sampai tersisa
+              <strong>1 pemain terakhir yang gagal menghabiskan kartunya (Kalah Terakhir / Juru Kunci)</strong>!
+            </p>
+          </div>
         </div>
-        <div class="modal-footer border-secondary">
-          <button type="button" class="btn btn-warning fw-bold" data-bs-dismiss="modal">Saya Mengerti</button>
+        <div class="p-3 text-center border-top border-secondary border-opacity-25">
+          <button type="button" class="btn-gold-cta px-5 py-2" data-bs-dismiss="modal">
+            <i class="bi bi-check2-circle me-1"></i> Saya Mengerti
+          </button>
         </div>
       </div>
     </div>
@@ -911,1316 +718,13 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    /**
-     * Game Kartu Remi "Minuman" - Hybrid (Online Multiplayer via Railway & Offline Bot)
-     */
-    $(document).ready(function () {
-
-      const SUITS = [
-        { id: 'hearts', name: 'Love / Hati', symbol: '♥', color: 'suit-hearts', icon: 'bi-suit-heart-fill' },
-        { id: 'diamonds', name: 'Wajik / Diamond', symbol: '♦', color: 'suit-diamonds', icon: 'bi-suit-diamond-fill' },
-        { id: 'clubs', name: 'Keriting / Club', symbol: '♣', color: 'suit-clubs', icon: 'bi-suit-club-fill' },
-        { id: 'spades', name: 'Sekop / Spade', symbol: '♠', color: 'suit-spades', icon: 'bi-suit-spade-fill' }
-      ];
-
-      const RANKS = [
-        { code: '2', val: 2, label: '2' },
-        { code: '3', val: 3, label: '3' },
-        { code: '4', val: 4, label: '4' },
-        { code: '5', val: 5, label: '5' },
-        { code: '6', val: 6, label: '6' },
-        { code: '7', val: 7, label: '7' },
-        { code: '8', val: 8, label: '8' },
-        { code: '9', val: 9, label: '9' },
-        { code: '10', val: 10, label: '10' },
-        { code: 'J', val: 11, label: 'J' },
-        { code: 'Q', val: 12, label: 'Q' },
-        { code: 'K', val: 13, label: 'K' },
-        { code: 'A', val: 14, label: 'A' }
-      ];
-
-      // Mode: 'OFFLINE' | 'MULTIPLAYER'
-      let mode = 'OFFLINE';
-      let socket = null;
-      let mpRoomId = null;
-      let isHost = false;
-
-      // Local state for Offline & synced for MP
-      let gameState = {
-        players: [],
-        rankings: [],
-        deck: [],
-        baseCard: null,
-        activeSuit: null,
-        trickPlays: [],
-        turnIndex: 0,
-        roundLeader: 0,
-        roundNumber: 1,
-        phase: 'PLAYING',
-        gameOver: false,
-        botDelay: 700,
-        myId: 0,
-        isMyTurn: true
-      };
-
-      function getSuitObj(suitId) {
-        return SUITS.find(s => s.id === suitId) || SUITS[0];
-      }
-
-      function hasMatchingSuit(cards, suitId) {
-        if (!suitId || !cards) return true;
-        return cards.some(c => c.suit === suitId);
-      }
-
-      function addLog(msg, type = 'info') {
-        const $logs = $('#gameLogs');
-        let colorClass = 'text-light';
-        let icon = 'bi-chevron-right';
-
-        if (type === 'drink') {
-          colorClass = 'text-warning';
-          icon = 'bi-cup-straw';
-        } else if (type === 'play') {
-          colorClass = 'text-info';
-          icon = 'bi-play-fill';
-        } else if (type === 'win') {
-          colorClass = 'text-success fw-bold';
-          icon = 'bi-trophy-fill';
-        } else if (type === 'base') {
-          colorClass = 'text-primary fw-bold';
-          icon = 'bi-flag-fill';
-        } else if (type === 'penalty') {
-          colorClass = 'text-danger fw-bold';
-          icon = 'bi-exclamation-triangle-fill';
-        } else if (type === 'skip') {
-          colorClass = 'text-white-50';
-          icon = 'bi-skip-forward';
-        } else if (type === 'rank') {
-          colorClass = 'text-warning fw-bold';
-          icon = 'bi-award-fill';
-        }
-
-        const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        const logItem = `
-      <div class="mb-1 ${colorClass}">
-        <span class="text-white-50" style="font-size: 11px;">[${timeStr}]</span> 
-        <i class="bi ${icon} me-1"></i>${msg}
-      </div>
-    `;
-        $logs.append(logItem);
-        $logs.scrollTop($logs[0].scrollHeight);
-      }
-
-      $('#btnClearLog').on('click', function () {
-        $('#gameLogs').empty();
-      });
-
-      $('#botSpeedRange').on('input', function () {
-        const val = parseInt($(this).val());
-        gameState.botDelay = val;
-        let label = 'Sedang';
-        if (val <= 400) label = 'Cepat';
-        else if (val >= 1200) label = 'Santai';
-        $('#speedLabel').text(label);
-      });
-
-      function renderCardHtml(card, isPlayable = false, customClass = '') {
-        if (!card) return '';
-        return `
-      <div class="playing-card ${card.colorClass} ${isPlayable ? 'playable' : ''} ${customClass}" 
-           data-card-id="${card.id}" 
-           title="${card.rankLabel} of ${card.suitName}">
-        <div class="card-top">
-          <span>${card.rankLabel}</span>
-          <span>${card.symbol}</span>
-        </div>
-        <div class="card-center-suit">${card.symbol}</div>
-        <div class="card-bottom">
-          <span>${card.rankLabel}</span>
-          <span>${card.symbol}</span>
-        </div>
-      </div>
-    `;
-      }
-
-      function getRankBadgeHtml(rank, isLoser = false) {
-        if (isLoser) {
-          return `<span class="badge rank-badge-last"><i class="bi bi-x-circle-fill me-1"></i>Kalah Terakhir</span>`;
-        }
-        if (rank === 1) {
-          return `<span class="badge rank-badge-1"><i class="bi bi-trophy-fill me-1"></i>Juara 1</span>`;
-        } else if (rank === 2) {
-          return `<span class="badge rank-badge-2"><i class="bi bi-award-fill me-1"></i>Juara 2</span>`;
-        } else if (rank === 3) {
-          return `<span class="badge rank-badge-3"><i class="bi bi-award-fill me-1"></i>Juara 3</span>`;
-        } else if (rank) {
-          return `<span class="badge rank-badge-default">Peringkat #${rank}</span>`;
-        }
-        return '';
-      }
-
-      function renderOpponentCards(count) {
-        if (count === 0) return '<span class="badge bg-success">Habis!</span>';
-        const displayMax = Math.min(count, 8);
-        let str = '<div class="d-flex justify-content-center" style="height: 24px;">';
-        for (let i = 0; i < displayMax; i++) {
-          str += `<div class="card-back" style="width: 14px; height: 22px; margin-right: -7px; border: 1px solid #fff; border-radius: 2px;"></div>`;
-        }
-        if (count > 8) {
-          str += `<span class="badge bg-dark ms-2 align-self-center" style="font-size: 10px;">+${count - 8}</span>`;
-        }
-        str += '</div>';
-        return str;
-      }
-
-      // ==========================================
-      // RENDER INTERFACE (DIGUNAKAN OFFLINE & MP)
-      // ==========================================
-      function updateUI() {
-        const isMp = mode === 'MULTIPLAYER';
-        const myId = isMp ? gameState.myId : 0;
-        const myPlayer = gameState.players.find(p => p.id === myId) || { name: 'Anda', hand: [], rank: null };
-        const myHand = isMp ? (gameState.myHand || []) : (myPlayer.hand || []);
-        const isMyTurn = isMp ? gameState.isMyTurn : (gameState.turnIndex === 0 && myPlayer.rank === null && !gameState.gameOver);
-
-        const activePlayers = gameState.players.filter(p => p.rank === null);
-        $('#activePlayersCountBadge').text(`Aktif: ${activePlayers.length}`);
-
-        // Base card
-        if (gameState.baseCard) {
-          $('#baseCardContainer').html(renderCardHtml(gameState.baseCard));
-          const suit = getSuitObj(gameState.activeSuit);
-          $('#currentSuitBadgeContainer').html(`
-        <div class="current-suit-badge">
-          <span class="${suit.colorClass}">${suit.symbol}</span>
-          <span>Wajib: ${suit.name}</span>
-        </div>
-      `);
-          $('#targetSuitName').html(`<span class="${suit.colorClass}">${suit.symbol} ${suit.name}</span>`);
-        } else {
-          $('#baseCardContainer').html(`
-        <div class="playing-card d-flex align-items-center justify-content-center text-white-50 border-secondary bg-dark" style="opacity: 0.6;">
-          <small class="text-center">Menunggu Base Baru</small>
-        </div>
-      `);
-          $('#currentSuitBadgeContainer').empty();
-          $('#targetSuitName').text('Bebas (Pilih Base)');
-        }
-
-        // Deck pile
-        const deckCount = isMp ? gameState.deckCount : gameState.deck.length;
-        $('#deckCount').text(deckCount);
-        if (deckCount === 0) {
-          $('#topDeckCard').html('<div class="small text-white-50 text-center p-1">Minuman Habis!</div>').css('background', '#334155');
-        } else {
-          $('#topDeckCard').html(`
-        <div class="card-back-pattern">
-          <i class="bi bi-cup-straw fs-2 text-warning"></i>
-        </div>
-      `).css('background', '');
-        }
-
-        // Current Trick plays + Base Card (Digabung di satu meja)
-        let trickHtml = '';
-        if (gameState.baseCard) {
-          const leader = gameState.players.find(p => p.id === gameState.roundLeader);
-          trickHtml += `
-            <div class="played-slot is-base-slot">
-              ${renderCardHtml(gameState.baseCard)}
-              <div class="slot-name text-warning" title="Base: ${leader ? leader.name : 'Awal'}">
-                <i class="bi bi-flag-fill me-1"></i>Base (${leader ? leader.name : 'Awal'})
-              </div>
-            </div>
-          `;
-        }
-
-        if (gameState.trickPlays.length === 0 && !gameState.baseCard) {
-          if (gameState.phase === 'CHOOSE_BASE') {
-            const leader = gameState.players.find(p => p.id === gameState.roundLeader);
-            trickHtml = `
-              <div class="text-warning fst-italic">
-                <i class="bi bi-star-fill me-1"></i> Menunggu ${leader ? leader.name : ''} menentukan Base baru...
-              </div>
-            `;
-          } else {
-            trickHtml = '<span class="text-white-50 fst-italic">Belum ada kartu di meja</span>';
-          }
-        } else {
-          for (let play of gameState.trickPlays) {
-            const p = gameState.players.find(x => x.id === play.playerId);
-            const isWinnerCard = gameState.phase === 'ROUND_SUMMARY' && gameState.roundWinnerInfo && gameState.roundWinnerInfo.winnerName === (p ? p.name : '');
-            trickHtml += `
-              <div class="played-slot ${isWinnerCard ? 'is-winner-slot' : ''}">
-                ${renderCardHtml(play.card)}
-                <div class="slot-name ${isWinnerCard ? 'text-success fw-bold' : ''}" title="${p ? p.name : ''}">
-                  ${isWinnerCard ? '<i class="bi bi-trophy-fill me-1"></i>' : ''}${p ? p.name : ''}
-                </div>
-              </div>
-            `;
-          }
-        }
-        $('#currentTrickContainer').html(trickHtml);
-
-        const totalCardsOnTable = gameState.trickPlays.length + (gameState.baseCard ? 1 : 0);
-        $('#roundProgress').text(`${gameState.trickPlays.length}/${activePlayers.length}`);
-
-        // Highest card
-        if (gameState.trickPlays.length > 0 && gameState.activeSuit) {
-          let highestPlay = null;
-          for (let tp of gameState.trickPlays) {
-            if (tp.card.suit === gameState.activeSuit) {
-              if (!highestPlay || tp.card.rankVal > highestPlay.card.rankVal) {
-                highestPlay = tp;
-              }
-            }
-          }
-          if (highestPlay) {
-            const hp = gameState.players.find(x => x.id === highestPlay.playerId);
-            $('#highestCardName').html(`<strong>${highestPlay.card.displayName}</strong> (${hp ? hp.name : ''})`);
-          } else {
-            $('#highestCardName').text('-');
-          }
-        } else {
-          $('#highestCardName').text('-');
-        }
-
-        // Opponents Area
-        let oppHtml = '';
-        const opponents = gameState.players.filter(p => p.id !== myId);
-        opponents.forEach(opp => {
-          const isTurn = (gameState.turnIndex === opp.id) && !gameState.gameOver && (opp.rank === null);
-          const isLeader = (gameState.roundLeader === opp.id) && (opp.rank === null);
-          const isFinished = opp.rank !== null;
-          const isLastLoser = opp.isLoser;
-          const cardCount = isMp ? opp.cardCount : opp.hand.length;
-
-          let statusBadge = '';
-          if (isFinished) {
-            statusBadge = getRankBadgeHtml(opp.rank, isLastLoser);
-          }
-
-          oppHtml += `
-        <div class="player-pod ${isTurn ? 'active-turn' : ''} ${isFinished ? (isLastLoser ? 'loser-pod' : 'finished-pod') : ''}" id="playerPod-${opp.id}">
-          <div class="d-flex align-items-center gap-2">
-            <span class="player-avatar-circle" title="${opp.name}">
-              ${opp.avatar || (isMp ? '👤' : '🤖')}
-            </span>
-            <div>
-              <div class="fw-bold d-flex align-items-center gap-1">
-                ${opp.name}
-                ${isLeader ? '<i class="bi bi-flag-fill text-warning" title="Pemimpin Ronde"></i>' : ''}
-                ${isMp && opp.isHost ? '<i class="bi bi-star-fill text-warning ms-1" title="Host"></i>' : ''}
-              </div>
-              <small class="${isFinished ? 'text-light' : 'text-white-50'}">
-                ${isFinished ? (isLastLoser ? 'Kalah Terakhir' : 'Lolos!') : cardCount + ' kartu'}
-              </small>
-            </div>
-          </div>
-          <div class="mt-2 text-center">
-            ${statusBadge ? statusBadge : renderOpponentCards(cardCount)}
-          </div>
-        </div>
-      `;
-        });
-        $('#opponentsArea').html(oppHtml);
-
-        // My Hand & Player Pod
-        const isHumanFinished = myPlayer.rank !== null;
-        $('#humanAvatarDisplay').text(myPlayer.avatar || '🦊');
-        $('#playerNameDisplay').html(`
-      ${myPlayer.name} ${isMp && isHost ? '<i class="bi bi-star-fill text-warning ms-1" title="Host"></i>' : ''}
-      ${isHumanFinished ? getRankBadgeHtml(myPlayer.rank, myPlayer.isLoser) : ''}
-    `);
-
-        if (isHumanFinished) {
-          $('#playerPod-0').addClass(myPlayer.isLoser ? 'loser-pod' : 'finished-pod').removeClass('active-turn');
-          $('#playerCardCount').text(myPlayer.isLoser ? 'Kalah Terakhir' : `Lolos (Juara #${myPlayer.rank})`);
-          $('#playerTurnIndicator').addClass('d-none');
-        } else {
-          $('#playerPod-0').removeClass('finished-pod loser-pod');
-          $('#playerCardCount').text(`${myHand.length} kartu`);
-          if (isMyTurn) {
-            $('#playerPod-0').addClass('active-turn');
-            $('#playerTurnIndicator').removeClass('d-none').text(gameState.phase === 'CHOOSE_BASE' ? 'Pilih 1 Kartu Base Baru!' : 'Giliran Anda!');
-          } else {
-            $('#playerPod-0').removeClass('active-turn');
-            $('#playerTurnIndicator').addClass('d-none');
-          }
-        }
-
-        // Render kartu di tangan
-        let humanCardsHtml = '';
-        const hasSuit = hasMatchingSuit(myHand, gameState.activeSuit);
-
-        if (isHumanFinished) {
-          if (myPlayer.isLoser) {
-            humanCardsHtml = `<div class="text-danger fw-bold py-3"><i class="bi bi-x-circle-fill me-1"></i> Anda kalah terakhir dengan sisa ${myHand.length} kartu.</div>`;
-          } else {
-            humanCardsHtml = `<div class="text-success fw-bold py-3"><i class="bi bi-check-circle-fill me-1"></i> Kartu Anda telah habis! Anda sudah lolos (${getRankBadgeHtml(myPlayer.rank)}). Menonton pemain lain...</div>`;
-          }
-        } else {
-          myHand.forEach((card) => {
-            let canPlay = false;
-            if (isMyTurn) {
-              if (gameState.phase === 'CHOOSE_BASE') {
-                canPlay = true;
-              } else {
-                if (card.suit === gameState.activeSuit) {
-                  canPlay = true;
-                }
-              }
-            }
-            const disabledClass = (!isMyTurn || !canPlay) ? 'disabled-card' : '';
-            humanCardsHtml += renderCardHtml(card, canPlay, disabledClass);
-          });
-        }
-        $('#humanHandCards').html(humanCardsHtml);
-
-        // Tombol Aksi
-        $('#btnHumanDrink').addClass('d-none');
-        $('#btnHumanTakePenalty').addClass('d-none');
-        $('#btnHumanSkip').addClass('d-none');
-        $('#drawPile').removeClass('can-drink');
-        $('#deckPrompt').addClass('d-none');
-
-        // Host Start Button in Lobby
-        if (isMp && gameState.roomStatus === 'LOBBY') {
-          if (isHost) {
-            $('#btnHostStartGame').removeClass('d-none');
-            $('#trickStatusMsg').html(`<span class="text-warning">Menunggu pemain lain bergabung. Klik "Mulai Game" jika sudah siap! (${gameState.players.length} Pemain)</span>`);
-          } else {
-            $('#btnHostStartGame').addClass('d-none');
-            $('#trickStatusMsg').html(`<span class="text-info">Menunggu Host memulai permainan... (${gameState.players.length} Pemain di Ruangan)</span>`);
-          }
-        } else {
-          $('#btnHostStartGame').addClass('d-none');
-        }
-
-        if (gameState.phase === 'ROUND_SUMMARY') {
-          $('#roundSummaryControl').removeClass('d-none');
-          const winInfo = gameState.roundWinnerInfo;
-          if (winInfo) {
-            $('#trickStatusMsg').html(`
-              <span class="text-success fw-bold fs-6">
-                <i class="bi bi-trophy-fill me-1"></i> Kartu Tertinggi: <strong>${winInfo.winnerName}</strong> (${winInfo.cardDisplayName})!
-              </span>
-              <br><small class="text-white-50 d-none">Klik tombol di bawah jika sudah siap melanjutkan ke ronde berikutnya.</small>
-            `);
-          } else {
-            $('#trickStatusMsg').html(`<span class="text-info fw-bold">Putaran selesai. Klik tombol di bawah untuk melanjutkan ronde.</span>`);
-          }
-        } else {
-          $('#roundSummaryControl').addClass('d-none');
-
-          if (isMyTurn && gameState.phase === 'PLAYING') {
-            if (!hasSuit) {
-              if (deckCount > 0) {
-                // $('#btnHumanDrink').removeClass('d-none');
-                $('#drawPile').addClass('can-drink');
-                $('#deckPrompt').removeClass('d-none');
-                $('#trickStatusMsg').text(`Anda tidak punya kartu ${getSuitObj(gameState.activeSuit).name}. Wajib MINUM!`);
-              } else {
-                if (gameState.trickPlays.length > 0) {
-                  $('#btnHumanTakePenalty').removeClass('d-none');
-                  $('#trickStatusMsg').html(`<span class="text-danger fw-bold">Minuman habis dan Anda tidak punya kartu ${getSuitObj(gameState.activeSuit).name}! Ambil (${gameState.trickPlays.length}) kartu di meja ini!</span>`);
-                } else {
-                  $('#btnHumanSkip').removeClass('d-none');
-                  $('#trickStatusMsg').text(`Minuman habis, meja kosong, dan Anda tidak punya kartu yang cocok. Klik Lewat (Skip).`);
-                }
-              }
-            } else {
-              // $('#trickStatusMsg').text(`Pilih salah satu kartu ${getSuitObj(gameState.activeSuit).name} Anda untuk dikeluarkan.`);
-            }
-          } else if (isMyTurn && gameState.phase === 'CHOOSE_BASE') {
-            $('#trickStatusMsg').text('Pilih 1 kartu dari tangan Anda untuk dijadikan Base baru.');
-          } else if (!isMyTurn && gameState.phase === 'PLAYING' && !(isMp && gameState.roomStatus === 'LOBBY')) {
-            const turnPlayer = gameState.players.find(p => p.id === gameState.turnIndex);
-            $('#trickStatusMsg').text(`Giliran ${turnPlayer ? turnPlayer.name : 'pemain lain'}...`);
-          }
-        }
-
-        // Sidebar Info
-        $('#roundCounter').text(`Ronde #${gameState.roundNumber}`);
-        const leader = gameState.players.find(p => p.id === gameState.roundLeader);
-        $('#leaderName').text(leader ? leader.name : '-');
-        const turnOwner = gameState.players.find(p => p.id === gameState.turnIndex);
-        $('#turnOwnerName').text(turnOwner ? turnOwner.name : '-');
-
-        updateLeaderboardUI();
-      }
-
-      function updateLeaderboardUI() {
-        let lbHtml = '<div class="list-group list-group-flush">';
-        const myId = mode === 'MULTIPLAYER' ? gameState.myId : 0;
-
-        gameState.rankings.forEach(pId => {
-          const p = gameState.players.find(x => x.id === pId);
-          if (p) {
-            lbHtml += `
-          <div class="list-group-item bg-transparent text-light border-secondary d-flex justify-content-between align-items-center py-1 px-2">
-            <div>
-              <span class="me-1">${p.avatar || '👤'}</span>
-              <span class="fw-semibold">${p.name}</span>
-              ${p.id === myId ? '<span class="badge bg-primary ms-1" style="font-size:10px;">Anda</span>' : ''}
-            </div>
-            <div>${getRankBadgeHtml(p.rank, p.isLoser)}</div>
-          </div>
-        `;
-          }
-        });
-
-        const active = gameState.players.filter(p => p.rank === null);
-        active.forEach(p => {
-          const cCount = mode === 'MULTIPLAYER' ? (p.id === myId ? (gameState.myHand ? gameState.myHand.length : 0) : p.cardCount) : p.hand.length;
-          lbHtml += `
-        <div class="list-group-item bg-transparent text-white-50 border-secondary d-flex justify-content-between align-items-center py-1 px-2">
-          <div>
-            <span class="me-1">${p.avatar || '👤'}</span>
-            <span>${p.name}</span>
-            ${p.id === myId ? '<span class="badge bg-secondary ms-1" style="font-size:10px;">Anda</span>' : ''}
-          </div>
-          <span class="badge bg-dark border border-secondary text-warning">${cCount || 0} kartu</span>
-        </div>
-      `;
-        });
-
-        lbHtml += '</div>';
-        $('#leaderboardList').html(lbHtml);
-      }
-
-      function showFinalGameOverModal(loser) {
-        let listHtml = '';
-        const myId = mode === 'MULTIPLAYER' ? gameState.myId : 0;
-
-        gameState.rankings.forEach((pId, idx) => {
-          const p = gameState.players.find(x => x.id === pId);
-          if (!p) return;
-          const isLoser = (loser && p.id === loser.id) || p.isLoser;
-
-          listHtml += `
-        <div class="list-group-item bg-dark text-light border-secondary d-flex justify-content-between align-items-center py-2">
-          <div class="d-flex align-items-center gap-2">
-            <span class="fs-5">${idx === 0 ? '🥇' : (idx === 1 ? '🥈' : (idx === 2 ? '🥉' : (isLoser ? '💀' : '🎖️')))}</span>
-            <span class="fs-5">${p.avatar || '👤'}</span>
-            <div>
-              <strong>${p.name}</strong> ${p.id === myId ? '<span class="badge bg-primary">Anda</span>' : ''}
-              ${isLoser ? `<br><small class="text-danger">Kalah Terakhir</small>` : ''}
-            </div>
-          </div>
-          <div>
-            ${getRankBadgeHtml(p.rank, isLoser)}
-          </div>
-        </div>
-      `;
-        });
-
-        $('#finalRankingsList').html(listHtml);
-        if (loser) {
-          $('#finalLoserAlert').removeClass('d-none').html(`
-        <i class="bi bi-emoji-dizzy-fill fs-3 text-danger d-block mb-1"></i>
-        <strong>${loser.name}</strong> adalah yang Kalah Terakhir (Juru Kunci)!
-      `);
-        } else {
-          $('#finalLoserAlert').addClass('d-none');
-        }
-
-        setTimeout(() => {
-          $('#gameOverModal').modal('show');
-        }, 800);
-      }
-
-      // ==========================================
-      // LOGIKA OFFLINE BOT
-      // ==========================================
-      function createStandardDeck() {
-        let deck = [];
-        let idCounter = 1;
-        for (let s of SUITS) {
-          for (let r of RANKS) {
-            deck.push({
-              id: idCounter++,
-              suit: s.id,
-              suitName: s.name,
-              symbol: s.symbol,
-              colorClass: s.color,
-              icon: s.icon,
-              rankCode: r.code,
-              rankVal: r.val,
-              rankLabel: r.label,
-              displayName: r.code + ' ' + s.symbol
-            });
-          }
-        }
-        return deck;
-      }
-
-      function shuffleDeck(deck) {
-        for (let i = deck.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [deck[i], deck[j]] = [deck[j], deck[i]];
-        }
-        return deck;
-      }
-
-      function sortHand(hand) {
-        const suitOrder = { 'hearts': 1, 'diamonds': 2, 'clubs': 3, 'spades': 4 };
-        hand.sort((a, b) => {
-          if (suitOrder[a.suit] !== suitOrder[b.suit]) {
-            return suitOrder[a.suit] - suitOrder[b.suit];
-          }
-          return a.rankVal - b.rankVal;
-        });
-      }
-
-      function initGameOffline(numPlayers, dealOption, humanName, humanAvatar) {
-        mode = 'OFFLINE';
-        $('#badgeGameMode').removeClass('bg-primary').addClass('bg-danger').text('Offline (Bot)');
-        $('#roomInfoBar').addClass('d-none');
-        $('#speedControlBox').removeClass('d-none');
-
-        let fullDeck = shuffleDeck(createStandardDeck());
-        gameState.deck = [];
-        gameState.players = [];
-        gameState.rankings = [];
-        gameState.trickPlays = [];
-        gameState.baseCard = null;
-        gameState.activeSuit = null;
-        gameState.roundNumber = 1;
-        gameState.phase = 'PLAYING';
-        gameState.gameOver = false;
-        gameState.myId = 0;
-        gameState.isMyTurn = true;
-
-        const botNames = ['Budi (Solo)', 'Slamet (Klaten)', 'Joko (Boyolali)', 'Agus (Sragen)', 'Bambang (Wonogiri)', 'Tri (Karanganyar)'];
-        const botAvatars = ['🐱', '🐶', '🦁', '🐼', '🐯', '🐵', '🐨', '🐰'];
-
-        gameState.players.push({
-          id: 0,
-          name: humanName || 'Pemain 1',
-          avatar: humanAvatar || $('#setupPlayerAvatar').val() || $('#inputMpPlayerAvatar').val() || '🦊',
-          isHuman: true,
-          hand: [],
-          rank: null,
-          isLoser: false
-        });
-
-        for (let i = 1; i < numPlayers; i++) {
-          gameState.players.push({
-            id: i,
-            name: botNames[(i - 1) % botNames.length],
-            avatar: botAvatars[(i - 1) % botAvatars.length],
-            isHuman: false,
-            hand: [],
-            rank: null,
-            isLoser: false
-          });
-        }
-
-        let cardsPerPlayer = 4;
-        if (dealOption === 'all') {
-          cardsPerPlayer = Math.floor((fullDeck.length - 1) / numPlayers);
-        } else {
-          cardsPerPlayer = parseInt(dealOption, 10);
-        }
-
-        for (let p of gameState.players) {
-          p.hand = fullDeck.splice(0, cardsPerPlayer);
-          sortHand(p.hand);
-        }
-
-        gameState.baseCard = fullDeck.pop();
-        gameState.activeSuit = gameState.baseCard.suit;
-        gameState.deck = fullDeck;
-        gameState.roundLeader = 0;
-        gameState.turnIndex = 0;
-
-        $('#gameLogs').empty();
-        $('#gameOverModal').modal('hide');
-        addLog(`Mode Offline vs Bot: ${numPlayers} pemain, ${cardsPerPlayer} kartu/orang.`, 'base');
-        addLog(`Base awal: <strong>${gameState.baseCard.displayName}</strong> (${getSuitObj(gameState.baseCard.suit).name}). Wajib ikuti!`, 'base');
-
-        updateUI();
-        runTurnCycleOffline();
-      }
-
-      function checkPlayerFinishingOffline(player) {
-        if (player.hand.length === 0 && player.rank === null) {
-          const nextRank = gameState.rankings.length + 1;
-          player.rank = nextRank;
-          gameState.rankings.push(player.id);
-          addLog(`🎉 <strong>${player.name}</strong> berhasil menghabiskan kartu dan meraih <strong>Peringkat #${nextRank}</strong>!`, 'rank');
-          checkGameOverOffline();
-          return true;
-        }
-        return false;
-      }
-
-      function checkGameOverOffline() {
-        const active = gameState.players.filter(p => p.rank === null);
-        if (active.length === 1 && !gameState.gameOver) {
-          const loser = active[0];
-          loser.rank = gameState.players.length;
-          loser.isLoser = true;
-          gameState.rankings.push(loser.id);
-          gameState.gameOver = true;
-          gameState.phase = 'GAME_OVER';
-
-          addLog(`💀 Permainan Berakhir! <strong>${loser.name}</strong> sisa ${loser.hand.length} kartu dan menjadi <strong>KALAH TERAKHIR</strong>!`, 'penalty');
-          updateUI();
-          showFinalGameOverModal(loser);
-          return true;
-        }
-        return false;
-      }
-
-      function runTurnCycleOffline() {
-        if (gameState.gameOver || mode !== 'OFFLINE') return;
-
-        let loops = 0;
-        while (gameState.players[gameState.turnIndex].rank !== null && loops < gameState.players.length) {
-          gameState.turnIndex = (gameState.turnIndex + 1) % gameState.players.length;
-          loops++;
-        }
-
-        const curPlayer = gameState.players[gameState.turnIndex];
-        updateUI();
-
-        if (curPlayer && !curPlayer.isHuman && curPlayer.rank === null) {
-          setTimeout(() => {
-            botTakeActionOffline(curPlayer);
-          }, gameState.botDelay);
-        }
-      }
-
-      function botTakeActionOffline(bot) {
-        if (gameState.gameOver || bot.rank !== null || mode !== 'OFFLINE') return;
-
-        if (gameState.phase === 'CHOOSE_BASE') {
-          let chosenCard = bot.hand[0];
-          for (let c of bot.hand) {
-            if (c.rankVal > chosenCard.rankVal) chosenCard = c;
-          }
-          playCardOffline(bot, chosenCard, true);
-          return;
-        }
-
-        const matchingCards = bot.hand.filter(c => c.suit === gameState.activeSuit);
-        if (matchingCards.length > 0) {
-          let highestOnTable = 0;
-          for (let tp of gameState.trickPlays) {
-            if (tp.card.suit === gameState.activeSuit && tp.card.rankVal > highestOnTable) {
-              highestOnTable = tp.card.rankVal;
-            }
-          }
-          let playableCard = null;
-          matchingCards.sort((a, b) => a.rankVal - b.rankVal);
-          for (let mc of matchingCards) {
-            if (mc.rankVal > highestOnTable) {
-              playableCard = mc;
-              break;
-            }
-          }
-          if (!playableCard) playableCard = matchingCards[0];
-          playCardOffline(bot, playableCard);
-        } else {
-          handleDrinkOrPenaltyOffline(bot);
-        }
-      }
-
-      function playCardOffline(player, card, isNewBase = false) {
-        const cardIdx = player.hand.findIndex(c => c.id === card.id);
-        if (cardIdx !== -1) player.hand.splice(cardIdx, 1);
-
-        if (isNewBase) {
-          gameState.baseCard = card;
-          gameState.activeSuit = card.suit;
-          gameState.phase = 'PLAYING';
-          gameState.trickPlays = [{ playerId: player.id, card: card }];
-          addLog(`<strong>${player.name}</strong> menentukan Base baru: <strong>${card.displayName}</strong> (${getSuitObj(card.suit).name})`, 'base');
-        } else {
-          gameState.trickPlays.push({ playerId: player.id, card: card });
-          addLog(`<strong>${player.name}</strong> mengeluarkan <strong>${card.displayName}</strong>`, 'play');
-        }
-
-        checkPlayerFinishingOffline(player);
-        if (gameState.gameOver) return;
-
-        advanceToNextPlayerOffline();
-      }
-
-      function advanceToNextPlayerOffline() {
-        const activePlayers = gameState.players.filter(p => p.rank === null);
-        if (gameState.trickPlays.length >= activePlayers.length) {
-          evaluateTrickWinnerOffline();
-          return;
-        }
-
-        let nextIdx = (gameState.turnIndex + 1) % gameState.players.length;
-        let loops = 0;
-        while (gameState.players[nextIdx].rank !== null && loops < gameState.players.length) {
-          nextIdx = (nextIdx + 1) % gameState.players.length;
-          loops++;
-        }
-
-        if (nextIdx === gameState.roundLeader && gameState.trickPlays.length > 0) {
-          evaluateTrickWinnerOffline();
-          return;
-        }
-
-        gameState.turnIndex = nextIdx;
-        runTurnCycleOffline();
-      }
-
-      function evaluateTrickWinnerOffline() {
-        updateUI();
-        addLog(`Putaran kartu selesai. Menghitung kartu tertinggi...`, 'info');
-
-        let validPlays = gameState.trickPlays
-          .filter(tp => tp.card.suit === gameState.activeSuit)
-          .sort((a, b) => b.card.rankVal - a.card.rankVal);
-
-        setTimeout(() => {
-          if (validPlays.length === 0) {
-            gameState.trickPlays = [];
-            gameState.phase = 'CHOOSE_BASE';
-            runTurnCycleOffline();
-            return;
-          }
-
-          const winningPlay = validPlays[0];
-          const roundWinner = gameState.players.find(p => p.id === winningPlay.playerId);
-          addLog(`★ <strong>${roundWinner.name}</strong> memenangkan ronde dengan <strong>${winningPlay.card.displayName}</strong>!`, 'win');
-
-          let nextBaseLeader = null;
-          if (roundWinner.rank === null) {
-            nextBaseLeader = roundWinner;
-          } else {
-            for (let i = 1; i < validPlays.length; i++) {
-              const cand = gameState.players.find(p => p.id === validPlays[i].playerId);
-              if (cand && cand.rank === null) {
-                nextBaseLeader = cand;
-                addLog(`Karena <strong>${roundWinner.name}</strong> sudah habis kartunya, hak membuat Base baru beralih ke <strong>${cand.name}</strong>!`, 'info');
-                break;
-              }
-            }
-            if (!nextBaseLeader) {
-              const active = gameState.players.filter(p => p.rank === null);
-              if (active.length > 0) {
-                nextBaseLeader = active[0];
-                addLog(`Hak membuat Base baru diberikan kepada <strong>${nextBaseLeader.name}</strong>.`, 'info');
-              }
-            }
-          }
-
-          if (checkGameOverOffline()) return;
-
-          // Jeda agar pemain bisa melihat kartu tertinggi: Masuk ke ROUND_SUMMARY
-          gameState.phase = 'ROUND_SUMMARY';
-          gameState.roundWinnerInfo = {
-            winnerName: roundWinner.name,
-            cardDisplayName: winningPlay.card.displayName,
-            nextLeaderName: nextBaseLeader ? nextBaseLeader.name : roundWinner.name
-          };
-          gameState.offlineNextRoundLeader = nextBaseLeader ? nextBaseLeader.id : 0;
-
-          updateUI();
-        }, 1000);
-      }
-
-      function handleDrinkOrPenaltyOffline(player) {
-        if (gameState.gameOver || player.rank !== null) return;
-
-        if (gameState.deck.length > 0) {
-          const drawnCard = gameState.deck.pop();
-          player.hand.push(drawnCard);
-          sortHand(player.hand);
-          addLog(`<strong>${player.name}</strong> tidak punya ${getSuitObj(gameState.activeSuit).name} → <strong>MINUM</strong> 1 kartu.`, 'drink');
-
-          if (player.id === 0) {
-            // Human player: tarik 1 kartu per 1x klik, jangan auto minum berulang kali
-            if (drawnCard.suit === gameState.activeSuit) {
-              addLog(`<strong>${player.name}</strong> mendapatkan kartu cocok: <strong>${drawnCard.displayName}</strong>! Silakan klik untuk mengeluarkannya.`, 'play');
-            } else {
-              addLog(`Kartu belum cocok (${drawnCard.displayName}). Klik Minum lagi jika tumpukan kartu masih ada.`, 'info');
-            }
-            updateUI();
-            return;
-          }
-
-          // Bot player: jika cocok auto-play, jika tidak cocok auto-minum lagi setelah jeda botDelay
-          if (drawnCard.suit === gameState.activeSuit) {
-            addLog(`<strong>${player.name}</strong> langsung mendapatkan kartu cocok: <strong>${drawnCard.displayName}</strong>!`, 'play');
-            updateUI();
-            setTimeout(() => {
-              playCardOffline(player, drawnCard);
-            }, gameState.botDelay);
-          } else {
-            updateUI();
-            if (gameState.deck.length > 0) {
-              setTimeout(() => {
-                handleDrinkOrPenaltyOffline(player);
-              }, Math.max(300, gameState.botDelay / 2));
-            } else {
-              applyTrickCardsPenaltyOffline(player);
-            }
-          }
-          return;
-        }
-
-        if (gameState.trickPlays.length > 0) {
-          addLog(`Minuman habis! <strong>${player.name}</strong> tidak punya ${getSuitObj(gameState.activeSuit).name} dan wajib mengambil kartu di meja!`, 'penalty');
-          applyTrickCardsPenaltyOffline(player);
-          return;
-        }
-
-        addLog(`<strong>${player.name}</strong> Lewat (Skip) karena meja kosong dan minuman habis.`, 'skip');
-        advanceToNextPlayerOffline();
-      }
-
-      function applyTrickCardsPenaltyOffline(player) {
-        if (gameState.trickPlays.length > 0) {
-          addLog(`🚨 <strong>${player.name}</strong> mengambil (${gameState.trickPlays.length}) kartu di meja sebagai minuman!`, 'penalty');
-          for (let tp of gameState.trickPlays) {
-            player.hand.push(tp.card);
-          }
-          sortHand(player.hand);
-          gameState.trickPlays = [];
-          updateUI();
-        }
-        advanceToNextPlayerOffline();
-      }
-
-      // ==========================================
-      // MULTIPLAYER SOCKET.IO INTEGRATION
-      // ==========================================
-      function connectSocket(serverUrl, onConnectSuccess, onConnectError) {
-        if (socket) {
-          socket.disconnect();
-        }
-
-        $('#mpConnectionStatus').html('<span class="text-warning"><i class="bi bi-hourglass-split"></i> Menghubungkan ke server Railway...</span>');
-
-        socket = io(serverUrl, {
-          transports: ['websocket', 'polling'],
-          timeout: 10000
-        });
-
-        socket.on('connect', () => {
-          $('#mpConnectionStatus').html('<span class="text-success"><i class="bi bi-check-circle-fill"></i> Terhubung ke server Socket.IO!</span>');
-          if (onConnectSuccess) onConnectSuccess();
-        });
-
-        socket.on('connect_error', (err) => {
-          $('#mpConnectionStatus').html(`<span class="text-danger"><i class="bi bi-x-circle-fill"></i> Gagal terhubung ke: ${serverUrl}. Pastikan server Railway/Localhost menyala.</span>`);
-          if (onConnectError) onConnectError(err);
-        });
-
-        // Event Server Update State
-        socket.on('gameStateUpdate', (data) => {
-          gameState.roomStatus = data.roomStatus;
-          gameState.players = data.players;
-          gameState.myHand = data.myHand;
-          gameState.myId = data.myId;
-          gameState.isMyTurn = data.isMyTurn;
-          gameState.deckCount = data.deckCount;
-          gameState.baseCard = data.baseCard;
-          gameState.activeSuit = data.activeSuit;
-          gameState.trickPlays = data.trickPlays;
-          gameState.turnIndex = data.turnIndex;
-          gameState.roundLeader = data.roundLeader;
-          gameState.roundNumber = data.roundNumber;
-          gameState.phase = data.phase;
-          gameState.rankings = data.rankings;
-          gameState.gameOver = data.gameOver;
-          gameState.roundWinnerInfo = data.roundWinnerInfo || null;
-
-          const myObj = data.players.find(p => p.id === data.myId);
-          isHost = myObj ? myObj.isHost : false;
-
-          updateUI();
-
-          // Jika game selesai di mode multiplayer, tampilkan Modal Hasil Akhir otomatis
-          if (data.gameOver && data.rankings && data.rankings.length > 0) {
-            const loserId = data.rankings[data.rankings.length - 1];
-            const loserObj = data.players.find(p => p.id === loserId);
-            showFinalGameOverModal(loserObj);
-          } else if (data.roomStatus === 'LOBBY') {
-            $('#gameOverModal').modal('hide');
-          }
-        });
-
-        // Event Log dari Server
-        socket.on('gameLog', ({ type, msg }) => {
-          addLog(msg, type);
-        });
-      }
-
-      // Avatar Picker Interaction (Multiplayer & Offline)
-      $(document).on('click', '.avatar-option-btn', function () {
-        const selectedAvatar = $(this).data('avatar');
-        const container = $(this).closest('.avatar-picker-grid');
-        container.find('.avatar-option-btn').removeClass('selected');
-        $(this).addClass('selected');
-
-        if (container.attr('id') === 'mpAvatarPicker') {
-          $('#inputMpPlayerAvatar').val(selectedAvatar);
-          $('#mpAvatarPreview').text(selectedAvatar);
-          // Sync ke offline juga
-          $('#setupPlayerAvatar').val(selectedAvatar);
-          $('#offlineAvatarPreview').text(selectedAvatar);
-          $('#offlineAvatarPicker .avatar-option-btn').removeClass('selected').filter(`[data-avatar="${selectedAvatar}"]`).addClass('selected');
-        } else {
-          $('#setupPlayerAvatar').val(selectedAvatar);
-          $('#offlineAvatarPreview').text(selectedAvatar);
-          // Sync ke multiplayer juga
-          $('#inputMpPlayerAvatar').val(selectedAvatar);
-          $('#mpAvatarPreview').text(selectedAvatar);
-          $('#mpAvatarPicker .avatar-option-btn').removeClass('selected').filter(`[data-avatar="${selectedAvatar}"]`).addClass('selected');
-        }
-      });
-
-      // Buat Room MP
-      $('#btnMpCreateRoom').on('click', function () {
-        const serverUrl = $('#inputServerUrl').val().trim();
-        const playerName = $('#inputMpPlayerName').val().trim() || 'Pemain 1';
-        const playerAvatar = $('#inputMpPlayerAvatar').val() || '🦊';
-        const dealOption = $('#inputMpDealCount').val();
-
-        if (!serverUrl) {
-          alert('Masukkan URL server Railway terlebih dahulu!');
-          return;
-        }
-
-        connectSocket(serverUrl, () => {
-          socket.emit('createRoom', { playerName, playerAvatar, dealOption }, (res) => {
-            if (res && res.success) {
-              mode = 'MULTIPLAYER';
-              mpRoomId = res.roomId;
-              isHost = true;
-
-              $('#badgeGameMode').removeClass('bg-danger').addClass('bg-primary').text('Online Multiplayer');
-              $('#roomInfoBar').removeClass('d-none');
-              $('#currentRoomCodeDisplay').text(res.roomId);
-              $('#speedControlBox').addClass('d-none');
-              $('#gameLogs').empty();
-
-              $('#multiplayerModal').modal('hide');
-              addLog(`🎮 Berhasil membuat Room: <strong>${res.roomId}</strong>. Bagikan kode ini ke teman Anda!`, 'base');
-            } else {
-              alert('Gagal membuat room: ' + (res ? res.message : 'Error'));
-            }
-          });
-        });
-      });
-
-      // Gabung Room MP
-      $('#btnMpJoinRoom').on('click', function () {
-        const serverUrl = $('#inputServerUrl').val().trim();
-        const playerName = $('#inputMpPlayerName').val().trim() || 'Pemain';
-        const playerAvatar = $('#inputMpPlayerAvatar').val() || '🐱';
-        const roomCode = $('#inputMpRoomCode').val().trim().toUpperCase();
-
-        if (!serverUrl) {
-          alert('Masukkan URL server Railway terlebih dahulu!');
-          return;
-        }
-        if (!roomCode || roomCode.length < 3) {
-          alert('Masukkan kode room dengan benar!');
-          return;
-        }
-
-        connectSocket(serverUrl, () => {
-          socket.emit('joinRoom', { roomId: roomCode, playerName, playerAvatar }, (res) => {
-            if (res && res.success) {
-              mode = 'MULTIPLAYER';
-              mpRoomId = res.roomId;
-              isHost = false;
-
-              $('#badgeGameMode').removeClass('bg-danger').addClass('bg-primary').text('Online Multiplayer');
-              $('#roomInfoBar').removeClass('d-none');
-              $('#currentRoomCodeDisplay').text(res.roomId);
-              $('#speedControlBox').addClass('d-none');
-              $('#gameLogs').empty();
-
-              $('#multiplayerModal').modal('hide');
-              addLog(`👋 Berhasil bergabung ke Room <strong>${res.roomId}</strong>! Menunggu host memulai game...`, 'info');
-            } else {
-              alert('Gagal bergabung: ' + (res ? res.message : 'Room tidak ditemukan'));
-            }
-          });
-        });
-      });
-
-      // Host Klik Mulai Game di Multiplayer
-      $('#btnHostStartGame').on('click', function () {
-        if (socket && mode === 'MULTIPLAYER') {
-          socket.emit('startGame', (res) => {
-            if (res && !res.success) {
-              alert(res.message);
-            }
-          });
-        }
-      });
-
-      // Beralih kembali ke mode offline
-      $('#btnSwitchOffline').on('click', function () {
-        if (socket) socket.disconnect();
-        $('#multiplayerModal').modal('hide');
-        const humanAvatar = $('#setupPlayerAvatar').val() || $('#inputMpPlayerAvatar').val() || '🦊';
-        initGameOffline(4, '4', $('#setupPlayerName').val() || 'Pemain 1', humanAvatar);
-      });
-
-      // ==========================================
-      // EVENT LISTENER USER AKSI KARTU & BUTTONS
-      // ==========================================
-      $(document).on('click', '#humanHandCards .playing-card', function () {
-        if (gameState.gameOver) return;
-        const cardId = parseInt($(this).data('card-id'));
-
-        if (mode === 'MULTIPLAYER') {
-          if (!gameState.isMyTurn) return;
-          socket.emit('playCard', { cardId });
-        } else {
-          if (gameState.turnIndex !== 0) return;
-          const human = gameState.players[0];
-          if (human.rank !== null) return;
-          const card = human.hand.find(c => c.id === cardId);
-          if (!card) return;
-
-          if (gameState.phase === 'CHOOSE_BASE') {
-            playCardOffline(human, card, true);
-            return;
-          }
-          if (card.suit === gameState.activeSuit) {
-            playCardOffline(human, card, false);
-          } else {
-            alert(`Anda wajib mengeluarkan kartu ${getSuitObj(gameState.activeSuit).name} (${getSuitObj(gameState.activeSuit).symbol})!`);
-          }
-        }
-      });
-
-      // Klik Minum Kartu
-      $('#btnHumanDrink, #drawPile').on('click', function () {
-        if (gameState.gameOver) return;
-
-        if (mode === 'MULTIPLAYER') {
-          if (!gameState.isMyTurn) return;
-          socket.emit('drinkCard');
-        } else {
-          if (gameState.turnIndex !== 0) return;
-          const human = gameState.players[0];
-          if (human.rank !== null) return;
-
-          if (hasMatchingSuit(human.hand, gameState.activeSuit)) {
-            alert(`Anda masih memiliki kartu ${getSuitObj(gameState.activeSuit).name}! Dilarang minum jika masih punya.`);
-            return;
-          }
-
-          if (gameState.deck.length > 0) {
-            handleDrinkOrPenaltyOffline(human);
-          } else {
-            if (gameState.trickPlays.length > 0) {
-              applyTrickCardsPenaltyOffline(human);
-            } else {
-              alert('Tumpukan minuman sudah habis!');
-            }
-          }
-        }
-      });
-
-      // Klik Ambil Penalti Kartu Meja
-      $('#btnHumanTakePenalty').on('click', function () {
-        if (gameState.gameOver) return;
-
-        if (mode === 'MULTIPLAYER') {
-          if (!gameState.isMyTurn) return;
-          socket.emit('takePenaltyCards');
-        } else {
-          if (gameState.turnIndex !== 0) return;
-          const human = gameState.players[0];
-          if (human.rank !== null) return;
-
-          if (hasMatchingSuit(human.hand, gameState.activeSuit)) {
-            alert(`Anda masih punya kartu yang cocok! Dilarang ambil penalti.`);
-            return;
-          }
-          if (gameState.trickPlays.length > 0) {
-            applyTrickCardsPenaltyOffline(human);
-          }
-        }
-      });
-
-      // Klik kartu meja langsung untuk ambil penalti
-      $(document).on('click', '#currentTrickContainer .playing-card', function () {
-        if (gameState.gameOver) return;
-        const isMp = mode === 'MULTIPLAYER';
-        const myHand = isMp ? gameState.myHand : gameState.players[0].hand;
-        const deckCount = isMp ? gameState.deckCount : gameState.deck.length;
-
-        if (!hasMatchingSuit(myHand, gameState.activeSuit) && deckCount === 0 && gameState.trickPlays.length > 0) {
-          if (isMp) {
-            if (gameState.isMyTurn) socket.emit('takePenaltyCards');
-          } else {
-            if (gameState.turnIndex === 0) applyTrickCardsPenaltyOffline(gameState.players[0]);
-          }
-        }
-      });
-
-      // Klik Lewat (Skip)
-      $('#btnHumanSkip').on('click', function () {
-        if (gameState.gameOver) return;
-
-        if (mode === 'MULTIPLAYER') {
-          if (!gameState.isMyTurn) return;
-          socket.emit('skipTurn');
-        } else {
-          if (gameState.turnIndex !== 0) return;
-          const human = gameState.players[0];
-          if (human.rank !== null) return;
-
-          if (hasMatchingSuit(human.hand, gameState.activeSuit)) {
-            alert(`Anda masih punya kartu yang cocok! Tidak boleh skip.`);
-            return;
-          }
-          if (gameState.deck.length > 0) {
-            alert(`Masih ada tumpukan minuman! Anda wajib minum terlebih dahulu.`);
-            return;
-          }
-          if (gameState.trickPlays.length > 0) {
-            alert(`Ada kartu di meja! Anda wajib mengambilnya karena minuman habis.`);
-            return;
-          }
-
-          addLog(`<strong>${human.name}</strong> Lewat (Skip) karena meja kosong dan minuman habis.`, 'skip');
-          advanceToNextPlayerOffline();
-        }
-      });
-
-      // Tombol Modal Setup Offline
-      $('#btnOpenSetupModal').on('click', function () {
-        if (mode === 'MULTIPLAYER') {
-          $('#multiplayerModal').modal('show');
-        } else {
-          $('#setupModal').modal('show');
-        }
-      });
-
-      $('#btnStartNewGameOffline').on('click', function () {
-        const playerCount = parseInt($('#setupPlayerCount').val());
-        const dealOption = $('#setupDealCount').val();
-        const playerName = $('#setupPlayerName').val().trim() || 'Pemain 1';
-        const playerAvatar = $('#setupPlayerAvatar').val() || '🦊';
-
-        $('#setupModal').modal('hide');
-        initGameOffline(playerCount, dealOption, playerName, playerAvatar);
-      });
-
-      // Tombol Lanjut Ronde Berikutnya (User klik untuk next round setelah jeda kartu tertinggi)
-      $('#btnNextRound').on('click', function () {
-        if (mode === 'MULTIPLAYER') {
-          if (socket && socket.connected) {
-            socket.emit('nextRound');
-          }
-        } else {
-          // Mode Offline
-          if (gameState.phase === 'ROUND_SUMMARY') {
-            const nextLeaderId = gameState.offlineNextRoundLeader !== undefined ? gameState.offlineNextRoundLeader : 0;
-            gameState.roundLeader = nextLeaderId;
-            gameState.turnIndex = nextLeaderId;
-            gameState.baseCard = null;
-            gameState.activeSuit = null;
-            gameState.trickPlays = [];
-            gameState.roundNumber++;
-            gameState.phase = 'CHOOSE_BASE';
-            gameState.roundWinnerInfo = null;
-
-            addLog(`▶️ Ronde #${gameState.roundNumber} dimulai! Giliran <strong>${gameState.players[gameState.roundLeader].name}</strong> menentukan Base baru.`, 'base');
-            updateUI();
-            runTurnCycleOffline();
-          }
-        }
-      });
-
-      // Fitur Salin Link Room (Langsung masuk via ?room=XXXXX)
-      $('#btnCopyRoomCode').on('click', function () {
-        const roomCode = $('#currentRoomCodeDisplay').text().trim();
-        if (!roomCode || roomCode === '-----') return;
-
-        // Buat format URL langsung masuk ?room=XXXXX
-        const currentUrl = new URL(window.location.href);
-        currentUrl.searchParams.set('room', roomCode);
-        const shareLink = currentUrl.toString();
-
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(shareLink).then(() => {
-            showCopySuccess();
-          }).catch(() => {
-            fallbackCopy(shareLink);
-          });
-        } else {
-          fallbackCopy(shareLink);
-        }
-      });
-
-      function showCopySuccess() {
-        const $btn = $('#btnCopyRoomCode');
-        const origText = $btn.html();
-        $btn.removeClass('btn-outline-warning').addClass('btn-success').html('<i class="bi bi-check-lg me-1"></i>Link Tersalin!');
-        setTimeout(() => {
-          $btn.removeClass('btn-success').addClass('btn-outline-warning').html(origText);
-        }, 2000);
-      }
-
-      function fallbackCopy(text) {
-        const $temp = $('<input>');
-        $('body').append($temp);
-        $temp.val(text).select();
-        document.execCommand('copy');
-        $temp.remove();
-        showCopySuccess();
-      }
-
-      // Tombol Main Lagi / Retry (Baik di GameOver modal maupun manual)
-      $('#btnRestartAfterOver').on('click', function () {
-        if (mode === 'MULTIPLAYER') {
-          if (socket && socket.connected) {
-            // Minta server untuk reset room state (retry tanpa buat room baru)
-            socket.emit('restartGame', (res) => {
-              $('#gameOverModal').modal('hide');
-            });
-          } else {
-            $('#multiplayerModal').modal('show');
-          }
-        } else {
-          $('#setupModal').modal('show');
-        }
-      });
-
-      // Cek apakah ada query param ?room=xxxx di URL
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlRoomCode = (urlParams.get('room') || '').trim().toUpperCase();
-
-      // Inisialisasi awal
-      initGameOffline(4, '4', 'Pemain 1');
-
-      if (urlRoomCode) {
-        // Otomatis arahkan ke Tab Join Room dan isi kodenya
-        $('#inputMpRoomCode').val(urlRoomCode);
-        $('#pills-join-tab').tab('show');
-        setTimeout(() => {
-          $('#multiplayerModal').modal('show');
-          addLog(`🔗 Terdeteksi undangan Room: <strong>${urlRoomCode}</strong>. Masukkan nama lalu klik Join Game Room!`, 'info');
-        }, 350);
-      } else {
-        // Buka popup Buat / Gabung Room Online secara langsung saat pertama kali web dibuka
-        setTimeout(() => {
-          $('#multiplayerModal').modal('show');
-        }, 350);
-      }
-
-    });
-  </script>
+  <script src="app.js"></script>
+
+  <!-- Floating Toast Notification (Screenshot 2 Match) -->
+  <div id="appToast" class="poker-toast" role="alert" aria-live="assertive" aria-atomic="true">
+    <i class="bi bi-bell-fill text-warning fs-5"></i>
+    <span id="appToastMsg">Notifikasi</span>
+  </div>
 
 </body>
 

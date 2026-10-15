@@ -139,7 +139,9 @@ function sendSanitizedRoomState(roomId) {
       rankings: room.rankings,
       gameOver: room.gameOver,
       activeCount: activePlayers.length,
-      roundWinnerInfo: room.roundWinnerInfo || null
+      roundWinnerInfo: room.roundWinnerInfo || null,
+      roundPlays: room.roundPlays || [],
+      roundActedPlayers: room.roundActedPlayers || []
     });
   });
 }
@@ -169,10 +171,11 @@ function checkGameOver(room) {
 }
 
 function advanceToNextPlayer(room) {
-  const activePlayers = getActivePlayers(room);
+  if (checkGameOver(room)) return;
 
-  if (room.trickPlays.length >= activePlayers.length) {
-    evaluateTrickWinner(room);
+  const activePlayers = getActivePlayers(room);
+  if (activePlayers.length <= 1) {
+    checkGameOver(room);
     return;
   }
 
@@ -183,7 +186,12 @@ function advanceToNextPlayer(room) {
     loops++;
   }
 
-  if (nextIdx === room.roundLeader && room.trickPlays.length > 0) {
+  const roundFinished = room.roundActedPlayers && (
+    room.roundActedPlayers.includes(nextIdx) ||
+    activePlayers.every(p => room.roundActedPlayers.includes(p.id))
+  );
+
+  if (roundFinished) {
     evaluateTrickWinner(room);
     return;
   }
@@ -199,7 +207,11 @@ function evaluateTrickWinner(room) {
     msg: `Putaran kartu selesai. Menghitung kartu tertinggi...`
   });
 
-  let validPlays = room.trickPlays
+  let playsToEvaluate = (room.roundPlays && room.roundPlays.length > 0)
+    ? room.roundPlays
+    : room.trickPlays;
+
+  let validPlays = playsToEvaluate
     .filter(tp => tp.card.suit === room.activeSuit)
     .sort((a, b) => b.card.rankVal - a.card.rankVal);
 
@@ -207,8 +219,20 @@ function evaluateTrickWinner(room) {
     if (!rooms[room.id]) return;
 
     if (validPlays.length === 0) {
+      const active = getActivePlayers(room);
+      let nextLeader = room.players.find(p => p.id === room.roundLeader);
+      if (!nextLeader || nextLeader.rank !== null) nextLeader = active[0];
+
       room.trickPlays = [];
+      room.roundPlays = [];
+      room.roundActedPlayers = [];
+      room.baseCard = null;
+      room.activeSuit = null;
       room.phase = 'CHOOSE_BASE';
+      if (nextLeader) {
+        room.roundLeader = nextLeader.id;
+        room.turnIndex = nextLeader.id;
+      }
       sendSanitizedRoomState(room.id);
       return;
     }
@@ -264,10 +288,52 @@ function evaluateTrickWinner(room) {
     };
 
     sendSanitizedRoomState(room.id);
+
+    // Auto lanjut ronde baru setelah 3 detik
+    if (room.autoNextRoundTimer) clearTimeout(room.autoNextRoundTimer);
+    room.autoNextRoundTimer = setTimeout(() => {
+      startNextRound(room);
+    }, 3000);
   }, 1000);
 }
 
+function startNextRound(room) {
+  if (!room || room.status !== 'PLAYING' || room.gameOver || room.phase !== 'ROUND_SUMMARY') return;
+  if (room.autoNextRoundTimer) {
+    clearTimeout(room.autoNextRoundTimer);
+    room.autoNextRoundTimer = null;
+  }
+
+  if (room.nextRoundState) {
+    if (room.nextRoundState.nextBaseLeader) {
+      room.roundLeader = room.nextRoundState.nextBaseLeader.id;
+      room.turnIndex = room.nextRoundState.nextBaseLeader.id;
+    }
+    room.baseCard = null;
+    room.activeSuit = null;
+    room.trickPlays = [];
+    room.roundPlays = [];
+    room.roundActedPlayers = [];
+    room.roundNumber++;
+    room.phase = 'CHOOSE_BASE';
+    room.roundWinnerInfo = null;
+    room.nextRoundState = null;
+
+    broadcastRoom(room.id, 'gameLog', {
+      type: 'base',
+      msg: `▶️ Ronde #${room.roundNumber} dimulai! Giliran <strong>${room.players[room.roundLeader].name}</strong> menentukan Base baru.`
+    });
+
+    sendSanitizedRoomState(room.id);
+  }
+}
+
 function applyTrickCardsPenalty(room, player) {
+  if (!room.roundActedPlayers) room.roundActedPlayers = [];
+  if (!room.roundActedPlayers.includes(player.id)) {
+    room.roundActedPlayers.push(player.id);
+  }
+
   if (room.trickPlays.length > 0) {
     broadcastRoom(room.id, 'gameLog', {
       type: 'penalty',
@@ -277,8 +343,8 @@ function applyTrickCardsPenalty(room, player) {
     for (let tp of room.trickPlays) {
       player.hand.push(tp.card);
     }
-    sortHand(player.hand);
     room.trickPlays = [];
+    room.baseCard = null;
     sendSanitizedRoomState(room.id);
   }
   advanceToNextPlayer(room);
@@ -309,6 +375,8 @@ io.on('connection', (socket) => {
       deck: [],
       rankings: [],
       trickPlays: [],
+      roundPlays: [],
+      roundActedPlayers: [],
       baseCard: null,
       activeSuit: null,
       roundLeader: 0,
@@ -335,10 +403,6 @@ io.on('connection', (socket) => {
 
     if (room.status !== 'LOBBY') {
       return callback && callback({ success: false, message: 'Game sudah berlangsung!' });
-    }
-
-    if (room.players.length >= 7) {
-      return callback && callback({ success: false, message: 'Room sudah penuh (maksimal 7 pemain)!' });
     }
 
     const newPlayer = {
@@ -399,6 +463,8 @@ io.on('connection', (socket) => {
     room.deck = fullDeck;
     room.rankings = [];
     room.trickPlays = [];
+    room.roundPlays = [];
+    room.roundActedPlayers = [];
     room.roundLeader = 0;
     room.turnIndex = 0;
     room.roundNumber = 1;
@@ -428,6 +494,8 @@ io.on('connection', (socket) => {
     room.deck = [];
     room.rankings = [];
     room.trickPlays = [];
+    room.roundPlays = [];
+    room.roundActedPlayers = [];
     room.baseCard = null;
     room.activeSuit = null;
     room.roundLeader = 0;
@@ -455,27 +523,18 @@ io.on('connection', (socket) => {
     const room = rooms[roomId];
     if (!room || room.status !== 'PLAYING' || room.gameOver) return;
     if (room.phase !== 'ROUND_SUMMARY') return;
+    startNextRound(room);
+  });
 
-    if (room.nextRoundState) {
-      if (room.nextRoundState.nextBaseLeader) {
-        room.roundLeader = room.nextRoundState.nextBaseLeader.id;
-        room.turnIndex = room.nextRoundState.nextBaseLeader.id;
-      }
-      room.baseCard = null;
-      room.activeSuit = null;
-      room.trickPlays = [];
-      room.roundNumber++;
-      room.phase = 'CHOOSE_BASE';
-      room.roundWinnerInfo = null;
-      room.nextRoundState = null;
-
-      broadcastRoom(roomId, 'gameLog', {
-        type: 'base',
-        msg: `▶️ Ronde #${room.roundNumber} dimulai! Giliran <strong>${room.players[room.roundLeader].name}</strong> menentukan Base baru.`
-      });
-
-      sendSanitizedRoomState(roomId);
-    }
+  // Pemain Mengurutkan Ulang Kartu di Tangan (Reorder Hand)
+  socket.on('reorderHand', () => {
+    const roomId = socket.roomId;
+    const room = rooms[roomId];
+    if (!room) return;
+    const player = room.players.find(p => p.socketId === socket.id);
+    if (!player || player.rank !== null) return;
+    sortHand(player.hand);
+    sendSanitizedRoomState(roomId);
   });
 
   // Pemain Mengeluarkan Kartu
@@ -497,6 +556,8 @@ io.on('connection', (socket) => {
       room.activeSuit = card.suit;
       room.phase = 'PLAYING';
       room.trickPlays = [{ playerId: curPlayer.id, card: card }];
+      room.roundPlays = [{ playerId: curPlayer.id, card: card }];
+      room.roundActedPlayers = [curPlayer.id];
 
       broadcastRoom(roomId, 'gameLog', {
         type: 'base',
@@ -507,6 +568,12 @@ io.on('connection', (socket) => {
 
       curPlayer.hand.splice(cardIdx, 1);
       room.trickPlays.push({ playerId: curPlayer.id, card: card });
+      if (!room.roundPlays) room.roundPlays = [];
+      room.roundPlays.push({ playerId: curPlayer.id, card: card });
+      if (!room.roundActedPlayers) room.roundActedPlayers = [];
+      if (!room.roundActedPlayers.includes(curPlayer.id)) {
+        room.roundActedPlayers.push(curPlayer.id);
+      }
 
       broadcastRoom(roomId, 'gameLog', {
         type: 'play',
@@ -544,7 +611,6 @@ io.on('connection', (socket) => {
     if (room.deck.length > 0) {
       const drawnCard = room.deck.pop();
       curPlayer.hand.push(drawnCard);
-      sortHand(curPlayer.hand);
 
       broadcastRoom(roomId, 'gameLog', {
         type: 'drink',
@@ -557,6 +623,14 @@ io.on('connection', (socket) => {
       if (room.trickPlays.length > 0) {
         applyTrickCardsPenalty(room, curPlayer);
       } else {
+        if (!room.roundActedPlayers) room.roundActedPlayers = [];
+        if (!room.roundActedPlayers.includes(curPlayer.id)) {
+          room.roundActedPlayers.push(curPlayer.id);
+        }
+        broadcastRoom(roomId, 'gameLog', {
+          type: 'skip',
+          msg: `<strong>${curPlayer.name}</strong> Lewat (Skip) karena meja kosong dan minuman habis.`
+        });
         advanceToNextPlayer(room);
       }
     }
@@ -587,6 +661,11 @@ io.on('connection', (socket) => {
 
     if (hasMatchingSuit(curPlayer, room.activeSuit)) return;
     if (room.deck.length > 0 || room.trickPlays.length > 0) return;
+
+    if (!room.roundActedPlayers) room.roundActedPlayers = [];
+    if (!room.roundActedPlayers.includes(curPlayer.id)) {
+      room.roundActedPlayers.push(curPlayer.id);
+    }
 
     broadcastRoom(roomId, 'gameLog', {
       type: 'skip',
