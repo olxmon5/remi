@@ -332,13 +332,13 @@ function startNextRound(room) {
   room.roundWinnerInfo = null;
   room.nextRoundState = null;
 
-    broadcastRoom(room.id, 'gameLog', {
-      type: 'base',
-      msg: `▶️ Ronde #${room.roundNumber} dimulai! Giliran <strong>${room.players[room.roundLeader].name}</strong> menentukan Base baru.`
-    });
+  broadcastRoom(room.id, 'gameLog', {
+    type: 'base',
+    msg: `▶️ Ronde #${room.roundNumber} dimulai! Giliran <strong>${room.players[room.roundLeader].name}</strong> menentukan Base baru.`
+  });
 
-    sendSanitizedRoomState(room.id);
-  }
+  sendSanitizedRoomState(room.id);
+}
 
 function applyTrickCardsPenalty(room, player) {
   if (!room.roundActedPlayers) room.roundActedPlayers = [];
@@ -367,7 +367,7 @@ io.on('connection', (socket) => {
 
   // Buat Room
   socket.on('createRoom', ({ playerName, playerAvatar, dealOption }, callback) => {
-    const roomId = Math.random().toString(36).substring(2, 7).toUpperCase();
+    const roomId = Math.random().toString(36).substring(2, 6).toUpperCase();
     rooms[roomId] = {
       id: roomId,
       hostSocketId: socket.id,
